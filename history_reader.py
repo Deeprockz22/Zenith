@@ -27,11 +27,20 @@ KNOWN_ENTERTAINMENT_ROOTS = {
     "disneyplus.com", "primevideo.com", "pinterest.com"
 }
 
+KNOWN_PODCAST_ROOTS = {
+    "podcasts.apple.com", "open.spotify.com", "spotify.com",
+    "overcast.fm", "pocketcasts.com", "podbean.com", "castbox.fm",
+    "stitcher.com", "audible.com", "ted.com", "npr.org", "bbc.co.uk"
+}
+
 KNOWN_PRODUCTIVE_ROOTS = {
     "github.com", "overleaf.com", "canvas.chalmers.se", "sso.canvaslms.com",
     "chalmers.se", "notion.so", "chatgpt.com", "claude.ai", "arxiv.org",
     "scholar.google.com", "stackoverflow.com", "mail.google.com", "docs.google.com",
-    "leetcode.com", "huggingface.co", "linear.app"
+    "leetcode.com", "huggingface.co", "linear.app",
+    "podcasts.apple.com", "open.spotify.com", "spotify.com",
+    "overcast.fm", "pocketcasts.com", "podbean.com", "castbox.fm",
+    "stitcher.com", "audible.com", "ted.com", "npr.org"
 }
 
 def get_active_history_db():

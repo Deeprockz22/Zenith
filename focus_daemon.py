@@ -198,11 +198,12 @@ def tab_watcher_loop():
                         last_intercept_time = now
                         redirect_active_tab(browser, REDIRECT_URL)
                         record_intercept(domain, decision.get("reason", "Entertainment"), title)
-                elif decision.get("category") == "educational_exception":
+                elif decision.get("category") in ("educational_exception", "podcast_exception"):
                     # Record exception once per session
                     if url != last_intercepted_url:
                         last_intercepted_url = url
-                        record_allowed_exception(domain, title, decision.get("reason", "Educational"))
+                        label = "Podcast" if decision.get("category") == "podcast_exception" else "Educational"
+                        record_allowed_exception(domain, title, decision.get("reason", label))
 
             time.sleep(0.8)
         except Exception:

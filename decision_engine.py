@@ -8,7 +8,33 @@ Evaluates page title, URL path, and browsing trajectory with typed decisions in 
 import sys
 import threading
 from urllib.parse import urlparse
-from history_reader import KNOWN_ENTERTAINMENT_ROOTS, KNOWN_PRODUCTIVE_ROOTS
+from history_reader import KNOWN_ENTERTAINMENT_ROOTS, KNOWN_PRODUCTIVE_ROOTS, KNOWN_PODCAST_ROOTS
+
+# Explicit keywords for podcast & long-form intellectual discussions
+PODCAST_KEYWORDS = [
+    "podcast", "interview", "conversation", "fireside chat", "fireside",
+    "deep dive", "dialogue", "roundtable", "keynote", "talks at google",
+    "ted talk", "tedx", "huberman lab", "andrew huberman", "lex fridman",
+    "dwarkesh patel", "dwarkesh", "acquired podcast", "acquired", "all-in podcast",
+    "all-in", "hardcore history", "dan carlin", "tim ferriss", "sam harris",
+    "making sense", "joe rogan", "jre ", "jre #", "full discussion",
+    "commencement address", "in conversation with", "q&a with", "audiobook",
+    "audio book", "philosophize this", "mindscape", "sean carroll", "bill gates",
+    "sam altman", "y combinator", "stanford online", "harvard online"
+]
+
+EDUCATIONAL_KEYWORDS = [
+    "tutorial", "course", "lecture", "how to", "engineering", "math",
+    "python", "chalmers", "coding", "deep learning", "documentary", "mit",
+    "stanford", "cs50", "crash course", "explanation", "analysis", "study",
+    "mechanics", "cfd", "machine learning", "homework", "exam", "research",
+    "computerphile", "numberphile", "veritasium", "3blue1brown"
+]
+
+HIGH_RISK_KEYWORDS = [
+    "/shorts", "/reels", "funny", "meme", "prank", "reaction", "gaming",
+    "trailer", "season", "s01", "s02", "s03", "streamer", "celebrity", "gossip", "trending"
+]
 
 # Lazy-loaded Jev Decider instance
 _decider = None
@@ -44,7 +70,8 @@ def get_jev_decider():
 def evaluate_tab(url, title, recent_trajectory=None):
     """
     Evaluates whether an active browser tab should be allowed or redirected.
-    Uses Tier 1 (fast whitelist) + Tier 2 (Jev single-pass neural decision).
+    Uses Tier 1 (fast whitelist) + Tier 2 (Jev single-pass neural decision) + Tier 3 (heuristics).
+    Explicitly permits educational content, podcasts, long-form talks, and interviews.
     """
     if not url:
         return {"action": "ALLOW", "reason": "Empty URL", "category": "neutral"}
@@ -56,13 +83,25 @@ def evaluate_tab(url, title, recent_trajectory=None):
 
     path = parsed.path.lower()
     title_clean = (title or "").strip()
+    title_lower = title_clean.lower()
 
-    # --- TIER 1: Instant Fast-Path for Known Productive Portals (< 0.1ms) ---
+    # --- TIER 1A: Dedicated Podcast Platforms (< 0.1ms) ---
+    if any(host == p or host.endswith("." + p) for p in KNOWN_PODCAST_ROOTS):
+        return {
+            "action": "ALLOW",
+            "reason": f"Podcast audio platform ({host})",
+            "category": "podcast_exception",
+            "domain": host,
+            "model": "fast-whitelist"
+        }
+
+    # --- TIER 1B: Instant Fast-Path for Known Productive Portals (< 0.1ms) ---
     if any(host == p or host.endswith("." + p) for p in KNOWN_PRODUCTIVE_ROOTS):
         return {
             "action": "ALLOW",
             "reason": f"Productive portal ({host})",
             "category": "productive",
+            "domain": host,
             "model": "fast-whitelist"
         }
 
@@ -73,6 +112,40 @@ def evaluate_tab(url, title, recent_trajectory=None):
             "action": "ALLOW",
             "reason": "Neutral domain",
             "category": "neutral",
+            "domain": host,
+            "model": "fast-whitelist"
+        }
+
+    # --- TIER 1C: Fast Blacklist for Obvious Doomscrolling Surfaces (< 0.1ms) ---
+    if path.startswith("/shorts") or path.startswith("/reels"):
+        return {
+            "action": "REDIRECT",
+            "reason": "Doomscroll Shorts / Reels surface",
+            "category": "entertainment",
+            "domain": host,
+            "model": "fast-blacklist"
+        }
+
+    # --- TIER 1D: Fast Whitelist for Unmistakable Podcasts & Lectures (< 0.1ms) ---
+    is_risk = any(kw in path or kw in title_lower for kw in HIGH_RISK_KEYWORDS)
+    is_explicit_podcast = any(kw in title_lower for kw in PODCAST_KEYWORDS)
+    is_explicit_edu = any(kw in title_lower for kw in EDUCATIONAL_KEYWORDS)
+
+    if is_explicit_podcast and not is_risk:
+        return {
+            "action": "ALLOW",
+            "reason": f"Allowed Podcast / Talk: {title_clean[:35]}",
+            "category": "podcast_exception",
+            "domain": host,
+            "model": "fast-whitelist"
+        }
+
+    if is_explicit_edu and not is_risk:
+        return {
+            "action": "ALLOW",
+            "reason": f"Allowed Educational: {title_clean[:35]}",
+            "category": "educational_exception",
+            "domain": host,
             "model": "fast-whitelist"
         }
 
@@ -80,67 +153,52 @@ def evaluate_tab(url, title, recent_trajectory=None):
     decider = get_jev_decider()
     if decider is not None and title_clean:
         try:
-            from so1 import Choice, yes_no
+            from so1 import Choice
 
-            # Format state representation for Jev
-            recent_context = ""
-            if recent_trajectory:
-                recent_hosts = [item.get("title", "")[:25] for item in recent_trajectory[:4]]
-                recent_context = " | Prior pages: " + ", ".join(recent_hosts)
-
-            state = f"Page Title: {title_clean} | Domain: {host} | Path: {path}{recent_context}"
+            state = f'Title: "{title_clean}"'
             questions = [
-                Choice("Intent", ["study_or_work", "casual_entertainment", "doomscrolling"]),
-                yes_no("Should redirect to focus?")
+                Choice("Type", ["podcast", "lecture", "entertainment", "shorts"])
             ]
 
             answers = decider.decide(state, questions)
-            intent_ans = answers[0]
-            redirect_ans = answers[1]
+            type_ans = answers[0]
+            choice = type_ans.choice
+            conf = type_ans.confidence
 
-            intent = intent_ans.choice
-            intent_conf = intent_ans.confidence
-            should_redirect = redirect_ans.choice == "yes"
-
-            if intent == "study_or_work" and intent_conf >= 0.55:
+            if choice in ("podcast", "lecture"):
+                category = "podcast_exception" if choice == "podcast" else "educational_exception"
+                label = "Podcast / Long-form talk" if choice == "podcast" else "Educational lecture"
                 return {
                     "action": "ALLOW",
-                    "reason": f"Jev allowed: Educational intent ({intent_conf*100:.0f}% confidence)",
-                    "category": "educational_exception",
+                    "reason": f"Jev allowed: {label} ({conf*100:.0f}% confidence)",
+                    "category": category,
                     "domain": host,
                     "model": "jev-system-one",
-                    "confidence": intent_conf
+                    "confidence": conf
                 }
             else:
                 return {
                     "action": "REDIRECT",
-                    "reason": f"Jev classified as {intent} ({intent_conf*100:.0f}% confidence)",
+                    "reason": f"Jev classified as {choice} ({conf*100:.0f}% confidence)",
                     "category": "entertainment",
                     "domain": host,
                     "model": "jev-system-one",
-                    "confidence": intent_conf
+                    "confidence": conf
                 }
-        except Exception as e:
-            # Fallback to heuristics if neural pass fails
+        except Exception:
             pass
 
     # --- TIER 3: Semantic Heuristic Fallback (< 1ms) ---
-    educational_keywords = [
-        "tutorial", "course", "lecture", "how to", "engineering", "math",
-        "python", "chalmers", "coding", "deep learning", "documentary", "mit",
-        "stanford", "cs50", "crash course", "explanation", "analysis", "study",
-        "mechanics", "cfd", "machine learning", "homework", "exam", "research"
-    ]
-    high_risk_keywords = [
-        "/shorts", "/reels", "funny", "meme", "prank", "reaction", "gaming",
-        "trailer", "season", "episode", "stream", "celebrity", "gossip", "trending"
-    ]
+    if is_explicit_podcast and not is_risk:
+        return {
+            "action": "ALLOW",
+            "reason": f"Podcast context exception ({title_clean[:30]}...)",
+            "category": "podcast_exception",
+            "domain": host,
+            "model": "heuristic-fallback"
+        }
 
-    title_lower = title_clean.lower()
-    is_edu = any(kw in title_lower for kw in educational_keywords)
-    is_risk = any(kw in path or kw in title_lower for kw in high_risk_keywords)
-
-    if is_edu and not is_risk:
+    if is_explicit_edu and not is_risk:
         return {
             "action": "ALLOW",
             "reason": f"Educational context exception ({title_clean[:30]}...)",
@@ -159,13 +217,19 @@ def evaluate_tab(url, title, recent_trajectory=None):
 
 if __name__ == "__main__":
     test_cases = [
-        ("https://www.youtube.com/watch?v=1", "MIT 18.06 Linear Algebra Lecture 1"),
-        ("https://www.youtube.com/watch?v=2", "Craziest Dog Fails Compilation"),
+        ("https://www.youtube.com/watch?v=1", "Lex Fridman Podcast #400 – Jeff Bezos"),
+        ("https://www.youtube.com/watch?v=2", "Huberman Lab: Tools to Optimize Your Focus | Episode 84"),
+        ("https://www.youtube.com/watch?v=3", "Dwarkesh Patel: Ilya Sutskever on AGI"),
+        ("https://www.youtube.com/watch?v=4", "Acquired: The Complete History of Nvidia"),
+        ("https://www.youtube.com/watch?v=5", "MIT 18.06 Linear Algebra Lecture 1"),
+        ("https://www.youtube.com/watch?v=6", "Craziest Dog Fails Compilation 2024"),
+        ("https://www.youtube.com/shorts/xyz", "Funny Dog Meme Short"),
         ("https://tv.apple.com/show/ted-lasso", "Watch Ted Lasso Season 3 Episode 1"),
-        ("https://github.com/HeyPuter/puter", "HeyPuter/puter repo"),
+        ("https://podcasts.apple.com/us/podcast/huberman-lab/id1545953110", "Huberman Lab on Apple Podcasts"),
+        ("https://open.spotify.com/episode/xyz", "The Joe Rogan Experience #2100"),
     ]
 
-    print("--- Testing Jev Hybrid Decision Engine ---")
+    print("--- Testing Jev Hybrid Decision Engine (with Podcast Support) ---")
     for u, t in test_cases:
         res = evaluate_tab(u, t)
-        print(f"[{res['action']:8s}] ({res.get('model', 'unknown'):18s}) {t[:35]:35s} -> {res['reason']}")
+        print(f"[{res['action']:8s}] ({res.get('model', 'unknown'):18s}) {t[:38]:38s} -> {res['reason']}")

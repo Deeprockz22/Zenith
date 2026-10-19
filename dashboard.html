@@ -247,8 +247,12 @@
         /* Telemetry Numbers Strip */
         .telemetry-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 0.75rem;
+        }
+
+        @media (max-width: 900px) {
+            .telemetry-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 600px) {
@@ -509,7 +513,12 @@
                 <span class="telem-sub">Estimated mental focus preserved</span>
             </div>
             <div class="telem-cell">
-                <span class="telem-key">[ TELEM.03 ] PEAK_VULNERABILITY</span>
+                <span class="telem-key">[ TELEM.03 ] PODCASTS_PERMITTED</span>
+                <span class="telem-val" id="stat-allowed" style="color: var(--green);">0</span>
+                <span class="telem-sub">Allowed audio talks & lectures</span>
+            </div>
+            <div class="telem-cell">
+                <span class="telem-key">[ TELEM.04 ] PEAK_VULNERABILITY</span>
                 <span class="telem-val" id="stat-peak" style="font-size: 1.4rem; color: var(--amber);">--:--</span>
                 <span class="telem-sub">Discovered from browser history</span>
             </div>
@@ -827,8 +836,20 @@
                 if (statsRes.ok) {
                     const stats = await statsRes.json();
                     const total = stats.total_intercepted || 0;
+                    const allowedList = stats.exceptions_allowed || [];
                     document.getElementById('stat-total').innerText = total;
                     document.getElementById('stat-time').innerText = `${total * 15}m`;
+                    document.getElementById('stat-allowed').innerText = allowedList.length;
+
+                    if (allowedList.length > 0) {
+                        const last = allowedList[allowedList.length - 1];
+                        const titlePreview = (last.title || '').slice(0, 30);
+                        document.getElementById('cli-feedback').innerText =
+                            `status --guard=active --podcasts=permitted [last allowed: ${titlePreview}]`;
+                    } else {
+                        document.getElementById('cli-feedback').innerText =
+                            'status --guard=active --podcasts=permitted --mode=calm';
+                    }
                 }
 
                 if (histRes.ok) {
