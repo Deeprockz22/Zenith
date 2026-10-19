@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiet Zone — Mindful Pause</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0c0e12;
+            --bg-card: rgba(18, 21, 28, 0.75);
+            --bg-subtle: rgba(255, 255, 255, 0.025);
+            --bg-hover: rgba(255, 255, 255, 0.05);
+            --border-hairline: rgba(255, 255, 255, 0.07);
+            --border-focus: rgba(255, 255, 255, 0.16);
+            --text-primary: #edeef0;
+            --text-secondary: #9aa1ad;
+            --text-muted: #5e6674;
+            --accent-sage: #84a98c;
+            --accent-sage-subtle: rgba(132, 169, 140, 0.12);
+            --accent-terracotta: #c27b68;
+            --accent-clay: #70857b;
+            --font-serif: 'Instrument Serif', Georgia, serif;
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3rem 1.5rem 2rem;
+            position: relative;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 0%, rgba(132, 169, 140, 0.05) 0%, transparent 70%);
+        }
+
+        .container {
+            max-width: 960px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-hairline);
+            padding-bottom: 1.25rem;
+        }
+
+        .brand-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .live-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent-sage);
+            box-shadow: 0 0 8px rgba(132, 169, 140, 0.6);
+            display: inline-block;
+        }
+
+        .audio-toggle-btn {
+            background: none;
+            border: 1px solid var(--border-hairline);
+            color: var(--text-muted);
+            padding: 0.4rem 0.85rem;
+            border-radius: 9999px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .audio-toggle-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--border-focus);
+            background: var(--bg-hover);
+        }
+
+        .audio-toggle-btn.active {
+            color: var(--accent-sage);
+            border-color: rgba(132, 169, 140, 0.4);
+            background: var(--accent-sage-subtle);
+        }
+
+        /* Hero / Focus Pause */
+        .hero-section {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.25rem;
+            padding: 1.5rem 0;
+        }
+
+        .hero-kicker {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent-clay);
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: clamp(2.75rem, 5vw, 4.25rem);
+            font-weight: 400;
+            line-height: 1.08;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+            max-width: 680px;
+        }
+
+        .hero-title em {
+            font-style: italic;
+            color: var(--accent-sage);
+        }
+
+        .hero-description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            max-width: 480px;
+            line-height: 1.6;
+        }
+
+        /* Breathing Guide Ring */
+        .breath-guide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.85rem;
+            margin: 0.5rem 0;
+        }
+
+        .breath-ring-wrap {
+            position: relative;
+            width: 88px;
+            height: 88px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .breath-ring-outer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(132, 169, 140, 0.25);
+            animation: breathe-pulse 8s infinite ease-in-out;
+        }
+
+        .breath-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-sage);
+            opacity: 0.85;
+            transition: transform 0.4s ease;
+        }
+
+        @keyframes breathe-pulse {
+            0%, 100% { transform: scale(0.7); opacity: 0.3; }
+            50% { transform: scale(1.15); opacity: 0.9; }
+        }
+
+        .breath-label {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        /* Telemetry Bento */
+        .telemetry-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            border-top: 1px solid var(--border-hairline);
+            border-bottom: 1px solid var(--border-hairline);
+            padding: 1.5rem 0;
+        }
+
+        @media (max-width: 680px) {
+            .telemetry-row {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+        }
+
+        .telemetry-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .telemetry-num {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .telemetry-val {
+            font-family: var(--font-serif);
+            font-size: 2.2rem;
+            line-height: 1.1;
+            color: var(--text-primary);
+        }
+
+        .telemetry-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* 2-Column Content */
+        .content-split {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 800px) {
+            .content-split {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quiet-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-hairline);
+            border-radius: 16px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .card-header-quiet {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid var(--border-hairline);
+            padding-bottom: 0.85rem;
+        }
+
+        .card-title-quiet {
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .card-meta-quiet {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* Minimalist Log */
+        .distraction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .distraction-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .distraction-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .distraction-name {
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .distraction-count {
+            font-family: var(--font-mono);
+            color: var(--accent-terracotta);
+            font-size: 0.78rem;
+        }
+
+        .bar-bg {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--accent-terracotta);
+            opacity: 0.75;
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .empty-quiet {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+
+        /* Swiss-Style Timer */
+        .timer-quiet {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.25rem;
+            padding: 0.5rem 0;
+        }
+
+        .timer-clock {
+            font-family: var(--font-mono);
+            font-size: 3.5rem;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .timer-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .pill-btn {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-hairline);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.55rem 1.25rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pill-btn:hover {
+            border-color: var(--border-focus);
+            background: var(--bg-hover);
+        }
+
+        .pill-btn.primary {
+            background: var(--text-primary);
+            color: var(--bg-deep);
+            border-color: var(--text-primary);
+        }
+
+        .pill-btn.primary:hover {
+            background: #ffffff;
+            opacity: 0.95;
+        }
+
+        /* Refined Launchpad */
+        .portals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .portal-link {
+            border: 1px solid var(--border-hairline);
+            border-radius: 12px;
+            padding: 0.9rem 0.85rem;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            background: var(--bg-subtle);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portal-link:hover {
+            border-color: var(--border-focus);
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+        }
+
+        .portal-index {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+
+        .portal-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 3rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Metadata & Controls -->
+        <header class="top-bar">
+            <div class="brand-meta">
+                <span class="live-indicator"></span>
+                <span>Active Sanctuary</span>
+                <span style="color: var(--border-hairline);">/</span>
+                <span style="color: var(--text-muted);" id="live-clock">--:--</span>
+            </div>
+
+            <button class="audio-toggle-btn active" id="audio-toggle" onclick="toggleAudio()" title="Toggle 432Hz Acoustic Bell">
+                <span>🔔</span>
+                <span id="audio-label">Chime On (432Hz)</span>
+            </button>
+        </header>
+
+        <!-- Calming Hero Section -->
+        <section class="hero-section">
+            <span class="hero-kicker">Mindful Intercept</span>
+            <h1 class="hero-title">Pause. Take a deep breath.<br><em>What was your intention?</em></h1>
+            <p class="hero-description">
+                You were guided away from an entertainment loop to give yourself a quiet moment of clarity.
+            </p>
+
+            <!-- Organic Breathing Guide -->
+            <div class="breath-guide">
+                <div class="breath-ring-wrap">
+                    <div class="breath-ring-outer"></div>
+                    <div class="breath-dot"></div>
+                </div>
+                <span class="breath-label" id="breath-text">Inhale gently</span>
+            </div>
+        </section>
+
+        <!-- Clean Telemetry Strip -->
+        <section class="telemetry-row">
+            <div class="telemetry-col">
+                <span class="telemetry-num">01 / DISRUPTIONS</span>
+                <span class="telemetry-val" id="stat-intercepts">0</span>
+                <span class="telemetry-label">Attempts paused today</span>
+            </div>
+            <div class="telemetry-col">
+                <span class="telemetry-num">02 / FOCUS PRESERVED</span>
+                <span class="telemetry-val" style="color: var(--accent-sage);" id="stat-time">0m</span>
+                <span class="telemetry-label">Estimated mental bandwidth</span>
+            </div>
+            <div class="telemetry-col">
+                <span class="telemetry-num">03 / FREQUENT REFLEX</span>
+                <span class="telemetry-val" style="font-size: 1.6rem; color: var(--accent-terracotta);" id="stat-top">—</span>
+                <span class="telemetry-label" id="stat-top-count">0 recorded</span>
+            </div>
+        </section>
+
+        <!-- Main Workspace -->
+        <div class="content-split">
+            <!-- Left: Quiet Distraction Telemetry -->
+            <div class="quiet-card">
+                <div class="card-header-quiet">
+                    <h2 class="card-title-quiet">Reflex Frequency</h2>
+                    <span class="card-meta-quiet" id="sync-status">Synced</span>
+                </div>
+
+                <div class="distraction-list" id="distraction-list">
+                    <div class="empty-quiet">No distraction attempts recorded. Quiet flow intact.</div>
+                </div>
+
+                <div style="margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--border-hairline); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">MONITORED: YOUTUBE, INSTAGRAM, X, THREADS, REDDIT</span>
+                    <button onclick="resetStats()" style="background: none; border: none; font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted); cursor: pointer; text-decoration: underline;">Reset</button>
+                </div>
+            </div>
+
+            <!-- Right: Swiss-style Minimalist Timer -->
+            <div class="quiet-card">
+                <div class="card-header-quiet">
+                    <h2 class="card-title-quiet">Focus Cadence</h2>
+                    <span class="card-meta-quiet">25m Block</span>
+                </div>
+
+                <div class="timer-quiet">
+                    <div class="timer-clock" id="timer-display">25:00</div>
+                    <div class="timer-actions">
+                        <button class="pill-btn primary" id="timer-btn" onclick="toggleTimer()">Begin Sprint</button>
+                        <button class="pill-btn" onclick="resetTimer()">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Browser History Intelligence -->
+        <div class="quiet-card">
+            <div class="card-header-quiet">
+                <h2 class="card-title-quiet">Habit Intelligence</h2>
+                <span class="card-meta-quiet" id="history-browser-meta">History DB: Arc</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div>
+                    <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.75rem;">Discovered Time-Sinks (From History)</div>
+                    <div id="history-distractions-list" class="distraction-list">
+                        <div class="empty-quiet" style="padding: 0.5rem 0;">Analyzing local history database...</div>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.75rem;">Pattern Telemetry</div>
+                    <div style="background: var(--bg-subtle); border: 1px solid var(--border-hairline); border-radius: 12px; padding: 1.1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+                            <span style="color: var(--text-secondary);">Peak Distraction Window:</span>
+                            <span style="font-family: var(--font-mono); color: var(--accent-terracotta); font-weight: 500;" id="peak-window">Analyzing...</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+                            <span style="color: var(--text-secondary);">Context Exception Engine:</span>
+                            <span style="font-family: var(--font-mono); color: var(--accent-sage);">Active (Title-Aware)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+                            <span style="color: var(--text-secondary);">Doomscroll Loop Guard:</span>
+                            <span style="font-family: var(--font-mono); color: var(--accent-sage);">Monitoring (15m window)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Productive Direction -->
+        <div class="quiet-card">
+            <div class="card-header-quiet">
+                <h2 class="card-title-quiet">Intentional Portals</h2>
+                <span class="card-meta-quiet">Choose deliberate work</span>
+            </div>
+
+            <div class="portals-grid">
+                <a href="https://github.com" target="_blank" class="portal-link" onclick="playClick()">
+                    <span class="portal-index">01</span>
+                    <span class="portal-title">GitHub</span>
+                </a>
+                <a href="https://notion.so" target="_blank" class="portal-link" onclick="playClick()">
+                    <span class="portal-index">02</span>
+                    <span class="portal-title">Notion</span>
+                </a>
+                <a href="https://chatgpt.com" target="_blank" class="portal-link" onclick="playClick()">
+                    <span class="portal-index">03</span>
+                    <span class="portal-title">ChatGPT</span>
+                </a>
+                <a href="https://claude.ai" target="_blank" class="portal-link" onclick="playClick()">
+                    <span class="portal-index">04</span>
+                    <span class="portal-title">Claude</span>
+                </a>
+                <a href="https://leetcode.com" target="_blank" class="portal-link" onclick="playClick()">
+                    <span class="portal-index">05</span>
+                    <span class="portal-title">LeetCode</span>
+                </a>
+                <a href="https://canvas.chalmers.se" target="_blank" class="portal-link" onclick="playClick()">
+                    <span class="portal-index">06</span>
+                    <span class="portal-title">Chalmers Study</span>
+                </a>
+            </div>
+        </div>
+
+        <footer>
+            FocusRedirect • Native macOS Tab Watcher & Quiet Zone
+        </footer>
+    </div>
+
+    <script>
+        // --- 1. Acoustic Bell & Haptic Audio Synthesis (Kyoto Rin & 432Hz Singing Bowl) ---
+        let audioCtx = null;
+        let audioEnabled = localStorage.getItem('focus_audio') !== 'false';
+
+        function getAudioContext() {
+            if (!audioEnabled) return null;
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return null;
+            if (!audioCtx || audioCtx.state === 'closed') {
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+            return audioCtx;
+        }
+
+        function playTibetanBowl(fundamental = 432, duration = 4.5, gain = 0.28) {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            try {
+                const now = ctx.currentTime;
+                const master = ctx.createGain();
+                master.gain.setValueAtTime(0.0001, now);
+                master.gain.linearRampToValueAtTime(gain, now + 0.02);
+                master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+                master.connect(ctx.destination);
+
+                // Natural harmonic modes with 1.3Hz acoustic beat
+                const modes = [
+                    { f: fundamental, g: 0.55, d: duration },
+                    { f: fundamental * 1.003, g: 0.45, d: duration * 0.95 },
+                    { f: fundamental * 2.76, g: 0.20, d: duration * 0.65 },
+                    { f: fundamental * 5.40, g: 0.08, d: duration * 0.35 }
+                ];
+
+                modes.forEach(m => {
+                    const osc = ctx.createOscillator();
+                    const g = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(m.f, now);
+                    g.gain.setValueAtTime(m.g, now);
+                    g.gain.exponentialRampToValueAtTime(0.0001, now + m.d);
+                    osc.connect(g);
+                    g.connect(master);
+                    osc.start(now);
+                    osc.stop(now + m.d);
+                });
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function playClick() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            try {
+                const now = ctx.currentTime;
+                const g = ctx.createGain();
+                g.gain.setValueAtTime(0.08, now);
+                g.gain.exponentialRampToValueAtTime(0.0001, now + 0.015);
+                g.connect(ctx.destination);
+
+                const osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1400, now);
+                osc.frequency.exponentialRampToValueAtTime(700, now + 0.015);
+                osc.connect(g);
+                osc.start(now);
+                osc.stop(now + 0.016);
+            } catch (e) {}
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            localStorage.setItem('focus_audio', audioEnabled);
+            const btn = document.getElementById('audio-toggle');
+            const lbl = document.getElementById('audio-label');
+            if (audioEnabled) {
+                btn.classList.add('active');
+                lbl.innerText = 'Chime On (432Hz)';
+                playTibetanBowl(432, 2.0, 0.15);
+            } else {
+                btn.classList.remove('active');
+                lbl.innerText = 'Muted';
+            }
+        }
+
+        // Play gentle arrival chime on load if enabled
+        window.addEventListener('click', () => {
+            if (audioEnabled && !audioCtx) {
+                playTibetanBowl(432, 3.5, 0.20);
+            }
+        }, { once: true });
+
+        // --- 2. Live Clock & Breathing Animation Guide ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        const breathText = document.getElementById('breath-text');
+        let breathState = 0;
+        setInterval(() => {
+            breathState = (breathState + 1) % 2;
+            breathText.innerText = breathState === 0 ? "Inhale gently" : "Release & soften";
+        }, 4000);
+
+        // --- 3. Swiss Focus Timer ---
+        let timerSeconds = 25 * 60;
+        let timerInterval = null;
+        let isRunning = false;
+
+        function updateTimerDisplay() {
+            const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+            const s = String(timerSeconds % 60).padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${m}:${s}`;
+        }
+
+        function toggleTimer() {
+            playClick();
+            const btn = document.getElementById('timer-btn');
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                btn.innerText = 'Resume';
+            } else {
+                isRunning = true;
+                btn.innerText = 'Pause';
+                playTibetanBowl(432, 3.0, 0.2);
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        isRunning = false;
+                        btn.innerText = 'Begin Sprint';
+                        playTibetanBowl(528, 6.0, 0.35); // Peaceful Solfeggio completion chime
+                        resetTimer();
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            playClick();
+            clearInterval(timerInterval);
+            isRunning = false;
+            timerSeconds = 25 * 60;
+            updateTimerDisplay();
+            document.getElementById('timer-btn').innerText = 'Begin Sprint';
+        }
+
+        // --- 4. Live Stats Sync ---
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/stats');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                const total = data.total_intercepted || 0;
+                document.getElementById('stat-intercepts').innerText = total;
+                document.getElementById('stat-time').innerText = `${total * 15}m`;
+
+                const entries = Object.entries(data.site_counts || {}).sort((a, b) => b[1] - a[1]);
+                const listEl = document.getElementById('distraction-list');
+
+                if (entries.length === 0) {
+                    listEl.innerHTML = `<div class="empty-quiet">No distraction attempts recorded. Quiet flow intact.</div>`;
+                    document.getElementById('stat-top').innerText = '—';
+                    document.getElementById('stat-top-count').innerText = '0 recorded';
+                } else {
+                    document.getElementById('stat-top').innerText = entries[0][0];
+                    document.getElementById('stat-top-count').innerText = `${entries[0][1]} ${entries[0][1] === 1 ? 'attempt' : 'attempts'}`;
+
+                    const maxVal = entries[0][1];
+                    listEl.innerHTML = entries.map(([domain, count]) => {
+                        const pct = Math.round((count / maxVal) * 100);
+                        return `
+                            <div class="distraction-item">
+                                <div class="distraction-info">
+                                    <span class="distraction-name">${domain}</span>
+                                    <span class="distraction-count">${count}</span>
+                                </div>
+                                <div class="bar-bg">
+                                    <div class="bar-fill" style="width: ${pct}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                document.getElementById('sync-status').innerText = 'Synced';
+            } catch (err) {
+                document.getElementById('sync-status').innerText = 'Offline';
+            }
+        }
+
+        async function resetStats() {
+            if (confirm("Reset today's recorded distractions?")) {
+                playClick();
+                await fetch('/api/reset');
+                fetchStats();
+            }
+        }
+
+        async function fetchHistory() {
+            try {
+                const res = await fetch('/api/history');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                if (data.browser) {
+                    document.getElementById('history-browser-meta').innerText = `History DB: ${data.browser}`;
+                }
+                if (data.peak_hour) {
+                    document.getElementById('peak-window').innerText = data.peak_hour;
+                }
+
+                const listEl = document.getElementById('history-distractions-list');
+                const top = data.top_distractions || [];
+                if (top.length > 0) {
+                    const maxCount = top[0].count;
+                    listEl.innerHTML = top.map(item => {
+                        const pct = Math.round((item.count / maxCount) * 100);
+                        return `
+                            <div class="distraction-item">
+                                <div class="distraction-info">
+                                    <span class="distraction-name">${item.domain}</span>
+                                    <span class="distraction-count">${item.count} visits</span>
+                                </div>
+                                <div class="bar-bg">
+                                    <div class="bar-fill" style="width: ${pct}%; background: var(--accent-clay);"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        updateTimerDisplay();
+        fetchStats();
+        fetchHistory();
+        setInterval(fetchStats, 3000);
+        setInterval(fetchHistory, 15000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# Virtual environment & Python bytecode
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Process and logs
+*.pid
+*.log
+focus.pid
+focus.log
+focus.err.log
+
+# Temporary databases & history snapshots
+*.sqlite
+*.sqlite3
+/tmp/focus_*
+
+# User statistics & local data
+focus_stats.json
+
+# macOS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
