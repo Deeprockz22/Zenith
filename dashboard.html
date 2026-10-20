@@ -3,1133 +3,927 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reflex — Focus Sanctuary</title>
+    <title>Reflex // ASCII Magic Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ============================================================
+           ASCII Magic Design Tokens (Derived from ascii-magic.com)
+           ============================================================ */
         :root {
-            /* Apple Color System (macOS Sequoia / iOS 18 palette) */
-            --bg-base: #000000;
-            --bg-surface: rgba(28, 28, 36, 0.65);
-            --bg-surface-elevated: rgba(38, 38, 48, 0.75);
-            --bg-surface-subtle: rgba(255, 255, 255, 0.05);
-            --bg-pill: rgba(255, 255, 255, 0.08);
-            --bg-pill-hover: rgba(255, 255, 255, 0.14);
-            --bg-pill-active: rgba(255, 255, 255, 0.22);
+            --bg: #040406;
+            --bg-elevated: #0b0b0e;
+            --bg-card: #08080b;
+            --border-faint: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.10);
+            --border-bright: rgba(255, 255, 255, 0.25);
+            --border-active: #FFFFFF;
+            --text: #FFFFFF;
+            --text-80: rgba(255, 255, 255, 0.80);
+            --text-60: rgba(255, 255, 255, 0.60);
+            --text-40: rgba(255, 255, 255, 0.40);
+            --accent: #FFFFFF;
+            --accent-text: #040406;
 
-            --border-glass: rgba(255, 255, 255, 0.10);
-            --border-glass-bright: rgba(255, 255, 255, 0.18);
-            --specular-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.22);
-            --shadow-card: 0 24px 60px -15px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.07);
-
-            --apple-blue: #0a84ff;
-            --apple-cyan: #64d2ff;
-            --apple-green: #30d158;
-            --apple-indigo: #5e5ce6;
-            --apple-purple: #bf5af2;
-            --apple-pink: #ff375f;
-            --apple-orange: #ff9f0a;
-            --apple-yellow: #ffd60a;
-
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.72);
-            --text-tertiary: rgba(255, 255, 255, 0.45);
-            --text-quaternary: rgba(255, 255, 255, 0.28);
-
-            --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", -system-ui, sans-serif;
-            --font-mono: "SF Mono", Menlo, Consolas, "JetBrains Mono", monospace;
-            --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+            --font-display: "Space Mono", "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            --font-body: "Inter", "Satoshi", -apple-system, system-ui, sans-serif;
+            --side-pad: 32px;
+            --content-max: 1200px;
         }
 
-        * {
+        *, *::before, *::after {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+        }
+
+        ::selection {
+            background: #353535;
+            color: #FFFFFF;
         }
 
         body {
-            background-color: var(--bg-base);
-            color: var(--text-primary);
-            font-family: var(--font-display);
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 14px;
+            line-height: 1.5;
             min-height: 100vh;
-            padding: 2.5rem 1.5rem 4rem;
-            display: flex;
-            justify-content: center;
-            position: relative;
             overflow-x: hidden;
-            line-height: 1.45;
-            selection-background-color: var(--apple-blue);
-        }
-
-        /* Ambient Apple Wallpaper Glow */
-        .ambient-mesh {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .ambient-blob-1 {
-            position: absolute;
-            top: -15%;
-            left: 15%;
-            width: 700px;
-            height: 700px;
-            background: radial-gradient(circle, rgba(94, 92, 230, 0.22) 0%, rgba(10, 132, 255, 0.12) 40%, transparent 70%);
-            filter: blur(90px);
-            animation: float-ambient 18s ease-in-out infinite alternate;
-        }
-
-        .ambient-blob-2 {
-            position: absolute;
-            top: 40%;
-            right: -10%;
-            width: 650px;
-            height: 650px;
-            background: radial-gradient(circle, rgba(100, 210, 255, 0.18) 0%, rgba(48, 209, 88, 0.08) 45%, transparent 70%);
-            filter: blur(100px);
-            animation: float-ambient-alt 22s ease-in-out infinite alternate;
-        }
-
-        .ambient-blob-3 {
-            position: absolute;
-            bottom: -15%;
-            left: 20%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(191, 90, 242, 0.14) 0%, rgba(255, 55, 95, 0.06) 50%, transparent 70%);
-            filter: blur(110px);
-            animation: float-ambient 24s ease-in-out infinite alternate;
-        }
-
-        @keyframes float-ambient {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(40px, -30px) scale(1.08); }
-            100% { transform: translate(-30px, 35px) scale(0.96); }
-        }
-
-        @keyframes float-ambient-alt {
-            0% { transform: translate(0, 0) scale(0.98); }
-            50% { transform: translate(-50px, 40px) scale(1.05); }
-            100% { transform: translate(30px, -20px) scale(1); }
-        }
-
-        /* Main Container */
-        .sanctuary-shell {
-            max-width: 1040px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
             position: relative;
-            z-index: 1;
         }
 
-        /* macOS Floating Header Capsule */
-        .mac-nav-bar {
-            background: rgba(24, 24, 30, 0.70);
-            backdrop-filter: blur(40px) saturate(200%);
-            -webkit-backdrop-filter: blur(40px) saturate(200%);
-            border: 1px solid var(--border-glass);
-            box-shadow: var(--specular-top), 0 10px 30px rgba(0, 0, 0, 0.4);
-            border-radius: 9999px;
-            padding: 0.6rem 1.25rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8125rem;
-            font-weight: 500;
+        /* Vertical Structural Side Rails (Signature of ascii-magic.com) */
+        .rails {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+            max-width: var(--content-max);
+            margin: 0 auto;
+            left: 0; right: 0;
         }
 
-        .nav-left, .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 0.85rem;
+        .rails::before, .rails::after {
+            content: "";
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 1px;
+            background: #DDDDDD;
+            opacity: 0.10;
         }
 
-        .apple-monogram {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            color: var(--text-primary);
-        }
+        .rails::before { left: 0; }
+        .rails::after { right: 0; }
 
-        .apple-monogram svg {
-            width: 15px;
-            height: 18px;
-            fill: currentColor;
-            opacity: 0.95;
-        }
-
-        .pill-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            background: rgba(48, 209, 88, 0.14);
-            color: var(--apple-green);
-            padding: 0.2rem 0.65rem;
-            border-radius: 9999px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            border: 1px solid rgba(48, 209, 88, 0.25);
-        }
-
-        .pulse-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--apple-green);
-            box-shadow: 0 0 8px var(--apple-green);
-            animation: pulse-ring 2.5s infinite;
-        }
-
-        @keyframes pulse-ring {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.45; transform: scale(0.85); }
-        }
-
-        .nav-meta-item {
-            color: var(--text-tertiary);
-            font-size: 0.75rem;
-        }
-
-        .mac-btn {
-            background: var(--bg-pill);
-            border: 1px solid var(--border-glass);
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.75rem;
-            font-weight: 500;
-            padding: 0.35rem 0.85rem;
-            border-radius: 9999px;
-            cursor: pointer;
-            transition: all 0.2s var(--ease-apple);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            box-shadow: var(--specular-top);
-        }
-
-        .mac-btn:hover {
-            background: var(--bg-pill-hover);
-            color: var(--text-primary);
-            border-color: var(--border-glass-bright);
-            transform: translateY(-0.5px);
-        }
-
-        .mac-btn:active {
-            transform: scale(0.97);
-            background: var(--bg-pill-active);
-        }
-
-        .mac-btn.active {
-            background: rgba(10, 132, 255, 0.2);
-            color: var(--apple-blue);
-            border-color: rgba(10, 132, 255, 0.35);
-        }
-
-        /* Hero Title Header */
-        .hero-banner {
-            text-align: center;
-            padding: 1rem 0 0.5rem;
+        /* Outer Layout Wrap */
+        .layout-wrap {
+            max-width: var(--content-max);
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 0.35rem;
+            border-left: 1px solid var(--border-faint);
+            border-right: 1px solid var(--border-faint);
+            min-height: 100vh;
         }
 
-        .hero-eyebrow {
-            font-size: 0.8rem;
-            font-weight: 600;
+        /* Top Navigation Bar */
+        .am-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 60px;
+            background: rgba(4, 4, 6, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--side-pad);
+        }
+
+        .am-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            background: linear-gradient(135deg, var(--apple-cyan), var(--apple-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        }
+
+        .am-brand-glyph {
+            display: inline-block;
+            background: #FFFFFF;
+            color: #040406;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .am-nav-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-family: var(--font-display);
+            font-size: 12px;
+            color: var(--text-60);
+        }
+
+        .am-status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #34d399;
+        }
+
+        .pulse-box {
+            width: 6px;
+            height: 6px;
+            background: #34d399;
+            box-shadow: 0 0 8px #34d399;
+            animation: pulse-square 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-square {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.85); }
+        }
+
+        /* ASCII Magic Signature Buttons */
+        .am-btn-primary {
+            display: inline-flex;
+            align-items: stretch;
+            gap: 2px;
+            height: 32px;
+            text-decoration: none;
+            background: transparent;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+            font-family: var(--font-display);
+        }
+
+        .am-btn-primary::before {
+            content: "";
+            width: 3px;
+            background: #FFFFFF;
+            flex: 0 0 3px;
+        }
+
+        .am-btn-primary-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #FFFFFF;
+            color: #040406;
+            padding: 0 14px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            transition: background 0.15s;
+            text-transform: uppercase;
+        }
+
+        .am-btn-primary:hover .am-btn-primary-label {
+            background: rgba(255, 255, 255, 0.90);
+        }
+
+        .am-btn-secondary {
+            height: 32px;
+            padding: 0 14px;
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            font-family: var(--font-display);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            outline: 1px solid var(--border-bright);
+            outline-offset: -1px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: background 0.15s, outline-color 0.15s;
+            text-transform: uppercase;
+        }
+
+        .am-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            outline-color: #FFFFFF;
+        }
+
+        /* Hero Section */
+        .am-hero {
+            padding: 48px var(--side-pad) 36px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: radial-gradient(ellipse 60% 80% at 50% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
+        }
+
+        .eyebrow {
+            font-family: var(--font-display);
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--text-40);
+        }
+
+        .hero-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 24px;
         }
 
         .hero-title {
-            font-size: 2.75rem;
-            font-weight: 700;
-            letter-spacing: -0.035em;
-            color: #ffffff;
-            line-height: 1.1;
-        }
-
-        .hero-subtitle {
-            font-size: 1rem;
-            color: var(--text-secondary);
+            font-family: var(--font-display);
+            font-size: clamp(28px, 4vw, 48px);
             font-weight: 400;
-            max-width: 580px;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            color: #FFFFFF;
         }
 
-        /* Card Surface (Liquid Retina / visionOS style) */
-        .glass-card {
-            background: var(--bg-surface);
-            backdrop-filter: blur(50px) saturate(190%);
-            -webkit-backdrop-filter: blur(50px) saturate(190%);
-            border: 1px solid var(--border-glass);
-            border-radius: 26px;
-            box-shadow: var(--shadow-card), var(--specular-top);
-            padding: 1.75rem;
+        .hero-rotator {
+            display: inline-flex;
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .hero-desc {
+            font-family: var(--font-body);
+            font-size: 15px;
+            line-height: 22px;
+            color: var(--text-80);
+            max-width: 640px;
+        }
+
+        /* Section Container */
+        .am-section {
+            padding: 32px var(--side-pad);
+            border-bottom: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            gap: 1.25rem;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            gap: 20px;
         }
 
-        .card-header-row {
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 0.25rem;
         }
 
-        .card-title-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.15rem;
-        }
-
-        .card-eyebrow {
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.06em;
+        .section-h2 {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
             text-transform: uppercase;
-            color: var(--text-tertiary);
         }
 
-        .card-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            letter-spacing: -0.015em;
-            color: var(--text-primary);
-        }
-
-        /* Persona Switcher (Segmented Control Pill Bar) */
-        .segmented-bar {
-            background: rgba(0, 0, 0, 0.45);
-            padding: 4px;
-            border-radius: 9999px;
+        /* ASCII Magic Live Interactive Canvas */
+        .ascii-studio-stage {
+            border: 1px solid var(--border);
+            background: #000000;
+            position: relative;
+            height: 220px;
+            overflow: hidden;
             display: flex;
-            gap: 4px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #ascii-live-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .ascii-stage-overlay {
+            position: relative;
+            z-index: 10;
+            background: rgba(4, 4, 6, 0.82);
+            border: 1px solid var(--border-bright);
+            padding: 14px 24px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .ascii-stage-phase {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+        }
+
+        .ascii-stage-sub {
+            font-size: 12px;
+            color: var(--text-60);
+        }
+
+        .ascii-stage-controls {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            z-index: 10;
+            display: flex;
+            gap: 6px;
+        }
+
+        .am-tag-btn {
+            background: rgba(11, 11, 14, 0.9);
+            border: 1px solid var(--border);
+            color: var(--text-60);
+            font-family: var(--font-display);
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .am-tag-btn:hover, .am-tag-btn.active {
+            color: #FFFFFF;
+            border-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Persona Switcher (ASCII Magic Pill Selector) */
+        .pills-track {
+            display: flex;
+            gap: 8px;
             overflow-x: auto;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 2px;
             scrollbar-width: none;
         }
-        .segmented-bar::-webkit-scrollbar { display: none; }
+        .pills-track::-webkit-scrollbar { display: none; }
 
-        .segment-btn {
-            flex: 1;
-            min-width: 110px;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            padding: 0.6rem 1rem;
-            border-radius: 9999px;
+        .pill {
+            flex: 0 0 auto;
+            background: var(--bg-elevated);
+            outline: 1px solid var(--border);
+            outline-offset: -1px;
+            padding: 9px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-60);
+            font-family: var(--font-display);
+            font-size: 12px;
+            letter-spacing: 0.04em;
             cursor: pointer;
-            transition: all 0.25s var(--ease-apple);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            white-space: nowrap;
-        }
-
-        .segment-btn:hover {
-            color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .segment-btn.active {
-            background: rgba(255, 255, 255, 0.16);
-            color: #ffffff;
-            font-weight: 600;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-        }
-
-        .persona-tagline-text {
-            font-size: 0.825rem;
-            color: var(--apple-cyan);
-            font-weight: 500;
-            letter-spacing: 0.02em;
-        }
-
-        /* Apple Watch Breathe Experience (Organic Petal Lotus) */
-        .breathe-module {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem 0 1rem;
-            text-align: center;
-            position: relative;
-        }
-
-        .lotus-container {
-            width: 170px;
-            height: 170px;
-            position: relative;
-            margin: 0.5rem 0 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .lotus-core {
-            position: absolute;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(100, 210, 255, 0.85) 0%, rgba(48, 209, 88, 0.5) 70%, transparent 100%);
-            filter: blur(8px);
-            z-index: 2;
-        }
-
-        .petal {
-            position: absolute;
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(100, 210, 255, 0.55), rgba(48, 209, 88, 0.35) 60%, rgba(94, 92, 230, 0.2) 100%);
-            mix-blend-mode: screen;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 20px rgba(100, 210, 255, 0.35);
-            transition: transform 3.8s var(--ease-apple), opacity 3.8s ease;
-        }
-
-        /* 6 Petals positioned in radial circle */
-        .petal-1 { transform: rotate(0deg) translate(28px); }
-        .petal-2 { transform: rotate(60deg) translate(28px); }
-        .petal-3 { transform: rotate(120deg) translate(28px); }
-        .petal-4 { transform: rotate(180deg) translate(28px); }
-        .petal-5 { transform: rotate(240deg) translate(28px); }
-        .petal-6 { transform: rotate(300deg) translate(28px); }
-
-        /* Animation class states */
-        .lotus-container.inhale .petal-1 { transform: rotate(25deg) translate(46px) scale(1.28); }
-        .lotus-container.inhale .petal-2 { transform: rotate(85deg) translate(46px) scale(1.28); }
-        .lotus-container.inhale .petal-3 { transform: rotate(145deg) translate(46px) scale(1.28); }
-        .lotus-container.inhale .petal-4 { transform: rotate(205deg) translate(46px) scale(1.28); }
-        .lotus-container.inhale .petal-5 { transform: rotate(265deg) translate(46px) scale(1.28); }
-        .lotus-container.inhale .petal-6 { transform: rotate(325deg) translate(46px) scale(1.28); }
-
-        .lotus-container.exhale .petal-1 { transform: rotate(0deg) translate(18px) scale(0.78); }
-        .lotus-container.exhale .petal-2 { transform: rotate(60deg) translate(18px) scale(0.78); }
-        .lotus-container.exhale .petal-3 { transform: rotate(120deg) translate(18px) scale(0.78); }
-        .lotus-container.exhale .petal-4 { transform: rotate(180deg) translate(18px) scale(0.78); }
-        .lotus-container.exhale .petal-5 { transform: rotate(240deg) translate(18px) scale(0.78); }
-        .lotus-container.exhale .petal-6 { transform: rotate(300deg) translate(18px) scale(0.78); }
-
-        .breathe-phase-label {
-            font-size: 1.25rem;
-            font-weight: 600;
-            letter-spacing: -0.015em;
-            color: #ffffff;
-            margin-bottom: 0.25rem;
-            transition: opacity 0.5s ease;
-        }
-
-        .breathe-instruction {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-
-        /* Telemetry Bento Grid */
-        .telemetry-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.15rem;
-        }
-
-        @media (max-width: 900px) {
-            .telemetry-row { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 580px) {
-            .telemetry-row { grid-template-columns: 1fr; }
-        }
-
-        .stat-bento-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 1.25rem 1.15rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            box-shadow: var(--specular-top);
-            transition: transform 0.2s var(--ease-apple), background 0.2s ease;
-        }
-
-        .stat-bento-card:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.15);
-        }
-
-        .stat-icon-label {
-            display: flex;
-            align-items: center;
-            gap: 0.45rem;
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
+            transition: all 0.15s ease;
+            border: 0;
             text-transform: uppercase;
-            color: var(--text-tertiary);
         }
 
-        .stat-val-huge {
-            font-size: 2.25rem;
+        .pill:hover {
+            color: var(--text);
+            outline-color: var(--border-bright);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .pill.active {
+            outline-color: var(--border-active);
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
             font-weight: 700;
-            letter-spacing: -0.03em;
-            font-variant-numeric: tabular-nums;
-            line-height: 1.15;
-            color: #ffffff;
         }
 
-        .stat-foot-note {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
+        .pill-badge {
+            opacity: 0.7;
         }
 
-        /* Mindful Entertainment Quota (Apple TV / Screen Time Style) */
-        .quota-grid {
+        /* Mindful Entertainment Quota (ASCII Matrix Widget) */
+        .quota-bento-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
+            gap: 16px;
         }
 
-        @media (max-width: 720px) {
-            .quota-grid { grid-template-columns: 1fr; }
+        @media (max-width: 768px) {
+            .quota-bento-grid { grid-template-columns: 1fr; }
         }
 
-        .quota-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 1.35rem;
+        .quota-box {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 0.85rem;
-            box-shadow: var(--specular-top);
+            gap: 14px;
+            position: relative;
         }
 
-        .quota-header-split {
+        .quota-box-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-family: var(--font-display);
+            font-size: 12px;
         }
 
-        .quota-badge-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.825rem;
-            font-weight: 600;
-            color: var(--text-primary);
+        .quota-kind-tag {
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
-        .quota-badge-title svg {
-            width: 17px;
-            height: 17px;
-            fill: var(--apple-cyan);
+        .quota-remaining-badge {
+            padding: 2px 8px;
+            background: rgba(52, 211, 153, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
 
-        .quota-pill-status {
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            padding: 0.2rem 0.6rem;
-            border-radius: 9999px;
-            background: rgba(48, 209, 88, 0.15);
-            color: var(--apple-green);
-            border: 1px solid rgba(48, 209, 88, 0.25);
+        .quota-remaining-badge.limit {
+            background: rgba(248, 113, 113, 0.12);
+            color: #f87171;
+            border-color: rgba(248, 113, 113, 0.25);
         }
 
-        .quota-pill-status.limit {
-            background: rgba(255, 55, 95, 0.15);
-            color: var(--apple-pink);
-            border-color: rgba(255, 55, 95, 0.25);
+        .quota-ascii-bar {
+            font-family: var(--font-display);
+            font-size: 15px;
+            color: #FFFFFF;
+            letter-spacing: 0.15em;
+            user-select: none;
         }
 
-        .quota-meter-capsules {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .capsule-segment {
-            flex: 1;
-            height: 10px;
-            border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.10);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s var(--ease-apple);
-        }
-
-        .capsule-segment.filled-series {
-            background: linear-gradient(90deg, var(--apple-blue), var(--apple-cyan));
-            box-shadow: 0 0 12px rgba(100, 210, 255, 0.5);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .capsule-segment.filled-movie {
-            background: linear-gradient(90deg, var(--apple-orange), var(--apple-yellow));
-            box-shadow: 0 0 12px rgba(255, 159, 10, 0.5);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .quota-stats-meta {
+        .quota-meta-row {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
+            font-family: var(--font-display);
         }
 
-        .quota-numbers {
-            font-size: 1.35rem;
+        .quota-ratio-num {
+            font-size: 22px;
             font-weight: 700;
             letter-spacing: -0.02em;
-            color: #ffffff;
-            font-variant-numeric: tabular-nums;
         }
 
-        .quota-desc-small {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .quota-title-hint {
+            font-family: var(--font-body);
+            font-size: 12px;
+            color: var(--text-60);
             max-width: 220px;
-        }
-
-        /* 2-Column Split: Distraction Matrix & Focus Timer */
-        .split-grid-2col {
-            display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 1.5rem;
-        }
-
-        @media (max-width: 820px) {
-            .split-grid-2col { grid-template-columns: 1fr; }
-        }
-
-        /* Apple Screen Time Style Distraction List */
-        .screen-time-table {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 0.85rem;
-        }
-
-        .screen-time-row {
-            display: grid;
-            grid-template-columns: 130px 1fr 48px;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.8125rem;
-        }
-
-        .st-domain-label {
-            font-weight: 500;
-            color: var(--text-primary);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .st-track-outer {
-            height: 7px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 9999px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .st-track-fill {
-            height: 100%;
-            border-radius: 9999px;
-            background: linear-gradient(90deg, var(--apple-blue), var(--apple-indigo));
-            transition: width 0.6s var(--ease-apple);
-        }
-
-        .st-count-label {
-            text-align: right;
-            font-weight: 600;
-            font-variant-numeric: tabular-nums;
-            color: var(--text-secondary);
-        }
-
-        /* Apple Clock Style Focus Stopwatch / Timer */
-        .timer-stage {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem 0;
-            gap: 1.25rem;
-        }
-
-        .timer-digits {
-            font-size: 4.25rem;
-            font-weight: 600;
-            letter-spacing: -0.04em;
-            font-variant-numeric: tabular-nums;
-            color: #ffffff;
-            font-feature-settings: "tnum" 1;
-            line-height: 1;
-            text-shadow: 0 0 35px rgba(255, 255, 255, 0.12);
-        }
-
-        .timer-controls {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .timer-primary-btn {
-            background: var(--apple-green);
-            color: #000000;
-            font-family: inherit;
-            font-size: 0.875rem;
-            font-weight: 600;
-            padding: 0.65rem 1.45rem;
-            border-radius: 9999px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s var(--ease-apple);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 18px rgba(48, 209, 88, 0.35);
-        }
-
-        .timer-primary-btn:hover {
-            transform: scale(1.02);
-            filter: brightness(1.06);
-        }
-
-        .timer-primary-btn:active {
-            transform: scale(0.97);
-        }
-
-        .timer-primary-btn.running {
-            background: var(--apple-orange);
-            color: #000000;
-            box-shadow: 0 4px 18px rgba(255, 159, 10, 0.35);
-        }
-
-        .timer-secondary-btn {
-            background: rgba(255, 255, 255, 0.10);
-            color: #ffffff;
-            font-family: inherit;
-            font-size: 0.875rem;
-            font-weight: 500;
-            padding: 0.65rem 1.25rem;
-            border-radius: 9999px;
-            border: 1px solid var(--border-glass);
-            cursor: pointer;
-            transition: all 0.2s var(--ease-apple);
-            box-shadow: var(--specular-top);
-        }
-
-        .timer-secondary-btn:hover {
-            background: rgba(255, 255, 255, 0.16);
-        }
-
-        .shortcut-pill {
-            font-size: 0.65rem;
-            background: rgba(0, 0, 0, 0.25);
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
-            opacity: 0.8;
-            font-family: var(--font-mono);
-        }
-
-        /* macOS Launchpad / Dock Style Workspaces Grid */
-        .dock-portals-grid {
+        /* 4-Column Metric Bento */
+        .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 0.85rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
         }
 
-        @media (max-width: 850px) {
-            .dock-portals-grid { grid-template-columns: repeat(3, 1fr); }
+        @media (max-width: 900px) {
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 500px) {
-            .dock-portals-grid { grid-template-columns: repeat(2, 1fr); }
+            .metrics-grid { grid-template-columns: 1fr; }
         }
 
-        .portal-app-tile {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 1.15rem 0.85rem;
+        .metric-cell {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .metric-label {
+            font-family: var(--font-display);
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-40);
+        }
+
+        .metric-value {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #FFFFFF;
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            color: var(--text-60);
+        }
+
+        /* 2-Column Split: Distraction Matrix & Focus Stopwatch */
+        .split-2col {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 820px) {
+            .split-2col { grid-template-columns: 1fr; }
+        }
+
+        .matrix-table {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .matrix-row {
+            display: grid;
+            grid-template-columns: 140px 1fr 48px;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-display);
+            font-size: 12px;
+        }
+
+        .matrix-host {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text);
+        }
+
+        .matrix-ascii-fill {
+            font-size: 11px;
+            color: #FFFFFF;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .matrix-count {
+            text-align: right;
+            color: var(--text-80);
+        }
+
+        /* Focus Block Stopwatch (ASCII Style) */
+        .stopwatch-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            text-align: center;
+        }
+
+        .stopwatch-digits {
+            font-family: var(--font-display);
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #FFFFFF;
+        }
+
+        .stopwatch-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Workspaces (ASCII Magic Grid) */
+        .portals-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 850px) {
+            .portals-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 500px) {
+            .portals-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .portal-item {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            padding: 14px 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            gap: 0.6rem;
+            gap: 8px;
             text-decoration: none;
-            color: var(--text-primary);
-            transition: all 0.25s var(--ease-apple);
-            box-shadow: var(--specular-top);
+            color: var(--text);
+            transition: all 0.15s ease;
             position: relative;
         }
 
-        .portal-app-tile:hover {
-            transform: translateY(-4px) scale(1.02);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 16px 30px -10px rgba(0, 0, 0, 0.5), var(--specular-top);
+        .portal-item:hover {
+            border-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-2px);
         }
 
-        .portal-icon-squircle {
-            width: 46px;
-            height: 46px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
-        }
-
-        .portal-app-name {
-            font-size: 0.78rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            color: var(--text-primary);
-        }
-
-        .portal-key-shortcut {
+        .portal-key {
             position: absolute;
-            top: 8px;
+            top: 6px;
             right: 8px;
-            font-size: 0.65rem;
-            color: var(--text-tertiary);
-            font-family: var(--font-mono);
+            font-family: var(--font-display);
+            font-size: 10px;
+            color: var(--text-40);
         }
 
-        /* Interactive Status Pill Footer */
-        .system-pill-footer {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-glass);
-            border-radius: 9999px;
-            padding: 0.65rem 1.25rem;
+        .portal-glyph {
+            font-size: 20px;
+        }
+
+        .portal-label {
+            font-family: var(--font-display);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* Bottom Command Status Strip */
+        .cli-status-bar {
+            padding: 16px var(--side-pad);
+            background: #000000;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
+            font-family: var(--font-display);
+            font-size: 12px;
+            color: var(--text-40);
+            border-top: 1px solid var(--border);
         }
 
-        .system-pill-footer b {
-            color: var(--text-secondary);
+        .cli-status-bar b {
+            color: #FFFFFF;
         }
 
         footer {
+            padding: 24px var(--side-pad);
             text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-quaternary);
-            padding: 1rem 0 0.5rem;
+            font-family: var(--font-display);
+            font-size: 11px;
+            color: var(--text-40);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
-    <!-- Apple Dynamic Atmospheric Mesh -->
-    <div class="ambient-mesh">
-        <div class="ambient-blob-1"></div>
-        <div class="ambient-blob-2"></div>
-        <div class="ambient-blob-3"></div>
-    </div>
+    <!-- Vertical Structural Side Rails -->
+    <div class="rails"></div>
 
-    <div class="sanctuary-shell">
-        <!-- macOS Floating Menu Bar Capsule -->
-        <nav class="mac-nav-bar">
-            <div class="nav-left">
-                <span class="apple-monogram">
-                    <!-- Apple SF logo icon -->
-                    <svg viewBox="0 0 170 170">
-                        <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.69-7.79-11.97-14.24-6.3-9.44-11.22-20.08-14.75-31.93-3.54-11.85-5.31-23.2-5.31-34.05 0-14.88 3.59-27.17 10.77-36.87 7.18-9.7 16.48-14.67 27.9-14.92 4.9.12 10.3 1.34 16.2 3.65 5.9 2.31 9.77 3.53 11.62 3.65 2.12-.25 6.13-1.57 12.03-3.95 5.9-2.38 11.06-3.48 15.48-3.3 13.06.63 23.36 5.48 30.91 14.54-11.39 6.89-17 16.44-16.82 28.65.18 9.53 3.86 17.5 11.05 23.91 7.19 6.41 15.7 10.02 25.53 10.84-2.13 6.4-4.87 13.04-8.23 19.93zM119.22 31.84c0-7.39 2.65-14.28 7.95-20.67 5.3-6.39 11.85-10.45 19.65-12.17.25 1.13.38 2.26.38 3.39 0 7.27-2.77 14.16-8.31 20.67-5.54 6.51-12.23 10.46-20.07 11.85-.25-1.01-.38-2.04-.38-3.07z"/>
-                    </svg>
-                    Reflex Sanctuary
-                </span>
-                <span class="pill-badge">
-                    <span class="pulse-dot"></span> Active Guard
-                </span>
-                <span class="nav-meta-item" id="time-display">--:--:--</span>
+    <div class="layout-wrap">
+        <!-- Top Nav Bar -->
+        <nav class="am-nav">
+            <div class="am-brand">
+                <span class="am-brand-glyph">AM</span>
+                <span>Reflex // Core</span>
             </div>
 
-            <div class="nav-right">
-                <span class="nav-meta-item" style="color: var(--apple-cyan); font-weight: 500;">
-                    47ms Jev Neural Core
+            <div class="am-nav-meta">
+                <span class="am-status-indicator">
+                    <span class="pulse-box"></span>
+                    <span>GUARD ACTIVE</span>
                 </span>
-                <span class="nav-meta-item" style="color: var(--text-tertiary);" id="browser-indicator">
-                    ARC
-                </span>
-                <button class="mac-btn active" id="audio-toggle-btn" onclick="toggleAudio()">
-                    <span>🔊</span>
-                    <span>Sound: 432Hz</span>
+                <span id="time-display">--:--:--</span>
+                <span id="browser-indicator" style="color: var(--text-80);">ARC</span>
+                <button class="am-btn-secondary" id="audio-toggle-btn" onclick="toggleAudio()">
+                    <span>🔊 432Hz</span>
                 </button>
-                <button class="mac-btn" onclick="resetStats()">
+                <button class="am-btn-secondary" onclick="resetStats()">
                     <span>Reset Logs</span>
                 </button>
             </div>
         </nav>
 
-        <!-- Hero Header -->
-        <header class="hero-banner">
-            <div class="hero-eyebrow">Cupertino Focus Intelligence</div>
-            <h1 class="hero-title">Mindful Focus Sanctuary</h1>
-            <p class="hero-subtitle">Context-aware neural protection preserving your cognitive energy.</p>
-        </header>
-
-        <!-- Focus Persona Switcher (Segmented Control) -->
-        <section class="glass-card">
-            <div class="card-header-row">
-                <div class="card-title-group">
-                    <span class="card-eyebrow">Operating Mode</span>
-                    <h2 class="card-title">Focus Persona</h2>
-                </div>
-                <div class="persona-tagline-text" id="active-profile-tagline">
-                    INITIALIZING PERSONA...
+        <!-- Hero Section -->
+        <section class="am-hero">
+            <div class="eyebrow">[ NEURAL_REFLEX_INTERCEPT // LOCAL_SANCTUARY ]</div>
+            <div class="hero-title-row">
+                <h1 class="hero-title">
+                    Context-Aware Guard for
+                    <div class="hero-rotator">
+                        [ <span id="rotator-word">Student & Scholar</span> ]
+                    </div>
+                </h1>
+                <div class="am-nav-cta">
+                    <button class="am-btn-primary" onclick="toggleChrono()">
+                        <span class="am-btn-primary-label" id="chrono-btn-label">Start Block</span>
+                    </button>
                 </div>
             </div>
-            <div class="segmented-bar" id="profile-buttons-container">
+            <p class="hero-desc">
+                High-performance neural firewall monitoring foreground browser tabs. Detects dopamine loops and protects your attention span with mindful friction.
+            </p>
+        </section>
+
+        <!-- Focus Persona Switcher (ASCII Magic Pill Selector) -->
+        <section class="am-section">
+            <div class="section-header">
+                <span class="eyebrow">[00] OPERATING_PERSONA</span>
+                <span style="font-family: var(--font-display); font-size: 11px; color: var(--text-60);" id="active-profile-tagline">
+                    INITIALIZING...
+                </span>
+            </div>
+            <div class="pills-track" id="profile-buttons-container">
                 <!-- Dynamically populated via /api/profiles -->
             </div>
         </section>
 
-        <!-- Apple Watch Mindfulness Breathe Experience -->
-        <section class="glass-card">
-            <div class="card-header-row">
-                <div class="card-title-group">
-                    <span class="card-eyebrow">Biofeedback Reset</span>
-                    <h2 class="card-title">Mindful Pause</h2>
-                </div>
-                <span class="pill-badge" style="background: rgba(100, 210, 255, 0.12); color: var(--apple-cyan); border-color: rgba(100, 210, 255, 0.25);">
-                    8.0s Rhythm
+        <!-- ASCII Magic Live Studio Stage (Interactive ASCII Canvas) -->
+        <section class="am-section">
+            <div class="section-header">
+                <span class="eyebrow">[01] MINDFUL_BIOFEEDBACK // ASCII_STUDIO</span>
+                <span style="font-family: var(--font-display); font-size: 11px; color: var(--text-60);">
+                    CYCLE: 8.0s
                 </span>
             </div>
-            <div class="breathe-module">
-                <div class="lotus-container" id="lotus-flower">
-                    <div class="lotus-core"></div>
-                    <div class="petal petal-1"></div>
-                    <div class="petal petal-2"></div>
-                    <div class="petal petal-3"></div>
-                    <div class="petal petal-4"></div>
-                    <div class="petal petal-5"></div>
-                    <div class="petal petal-6"></div>
+
+            <div class="ascii-studio-stage">
+                <canvas id="ascii-live-canvas"></canvas>
+                <div class="ascii-stage-overlay">
+                    <div class="ascii-stage-phase" id="breath-state">INHALE GENTLY</div>
+                    <div class="ascii-stage-sub">Take a calming pause before switching tabs</div>
                 </div>
-                <div class="breathe-phase-label" id="breath-state">Inhale Gently</div>
-                <div class="breathe-instruction">Take a calming breath before instinctively switching context.</div>
+                <div class="ascii-stage-controls">
+                    <button class="am-tag-btn active" onclick="setAsciiMode('characters')">ASCII</button>
+                    <button class="am-tag-btn" onclick="setAsciiMode('halftone')">Dots</button>
+                    <button class="am-tag-btn" onclick="setAsciiMode('blocks')">Blocks</button>
+                </div>
             </div>
         </section>
 
-        <!-- Mindful Entertainment Quota (Apple TV / Screen Time Widget) -->
-        <section class="glass-card">
-            <div class="card-header-row">
-                <div class="card-title-group">
-                    <span class="card-eyebrow">Daily Entertainment Allowance</span>
-                    <h2 class="card-title">Mindful Media Quota</h2>
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="font-size: 0.78rem; color: var(--apple-yellow); font-weight: 500;" id="quota-status-label">
-                        Series: 0/2 Eps • Movies: 0/1 Film
+        <!-- Mindful Entertainment Quota (Daily Allowance Widget) -->
+        <section class="am-section">
+            <div class="section-header">
+                <span class="eyebrow">[02] MINDFUL_MEDIA_QUOTA // DAILY_ALLOWANCE</span>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <span style="font-family: var(--font-display); font-size: 11px; color: #fbbf24;" id="quota-status-label">
+                        SERIES: 0/2 EPS | MOVIES: 0/1 FILM
                     </span>
-                    <button class="mac-btn" onclick="resetQuota()" style="font-size: 0.7rem; padding: 0.2rem 0.65rem;">
-                        Reset Quota
-                    </button>
+                    <button class="am-tag-btn" onclick="resetQuota()">RESET_QUOTA</button>
                 </div>
             </div>
 
-            <div class="quota-grid">
-                <!-- TV Series Card -->
-                <div class="quota-card">
-                    <div class="quota-header-split">
-                        <div class="quota-badge-title">
-                            <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
-                            <span>TV Series</span>
-                        </div>
-                        <span class="quota-pill-status" id="quota-ep-status">2 Remaining</span>
+            <div class="quota-bento-grid">
+                <!-- TV Series Box -->
+                <div class="quota-box">
+                    <div class="quota-box-top">
+                        <span class="quota-kind-tag">📺 TV SERIES (MAX 2 EPS / DAY)</span>
+                        <span class="quota-remaining-badge" id="quota-ep-status">2 REMAINING</span>
                     </div>
-
-                    <div class="quota-meter-capsules" id="episodes-capsule-bar">
-                        <div class="capsule-segment" id="ep-seg-1"></div>
-                        <div class="capsule-segment" id="ep-seg-2"></div>
+                    <div class="quota-ascii-bar" id="quota-ep-bar">
+                        [ ░░░░░░░░░░░░░░░░░░░░ ]
                     </div>
-
-                    <div class="quota-stats-meta">
-                        <span class="quota-numbers" id="quota-ep-ratio">0 / 2</span>
-                        <span class="quota-desc-small" id="quota-ep-desc">Watched: None yet today</span>
+                    <div class="quota-meta-row">
+                        <span class="quota-ratio-num" id="quota-ep-ratio">0 / 2</span>
+                        <span class="quota-title-hint" id="quota-ep-desc">Watched: None yet today</span>
                     </div>
                 </div>
 
-                <!-- Feature Movie Card -->
-                <div class="quota-card">
-                    <div class="quota-header-split">
-                        <div class="quota-badge-title">
-                            <svg viewBox="0 0 24 24" style="fill: var(--apple-orange);"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
-                            <span>Feature Film</span>
-                        </div>
-                        <span class="quota-pill-status" id="quota-movie-status">1 Remaining</span>
+                <!-- Feature Movie Box -->
+                <div class="quota-box">
+                    <div class="quota-box-top">
+                        <span class="quota-kind-tag">🎬 FEATURE FILM (MAX 1 / DAY)</span>
+                        <span class="quota-remaining-badge" id="quota-movie-status">1 REMAINING</span>
                     </div>
-
-                    <div class="quota-meter-capsules" id="movies-capsule-bar">
-                        <div class="capsule-segment" id="mov-seg-1"></div>
+                    <div class="quota-ascii-bar" id="quota-movie-bar">
+                        [ ░░░░░░░░░░░░░░░░░░░░ ]
                     </div>
-
-                    <div class="quota-stats-meta">
-                        <span class="quota-numbers" id="quota-movie-ratio">0 / 1</span>
-                        <span class="quota-desc-small" id="quota-movie-desc">Watched: None yet today</span>
+                    <div class="quota-meta-row">
+                        <span class="quota-ratio-num" id="quota-movie-ratio">0 / 1</span>
+                        <span class="quota-title-hint" id="quota-movie-desc">Watched: None yet today</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Bento Telemetry Stats Strip -->
-        <section class="telemetry-row">
-            <div class="stat-bento-card">
-                <span class="stat-icon-label" style="color: var(--apple-green);">
-                    <span>🛡️</span> Pauses Today
-                </span>
-                <span class="stat-val-huge" id="stat-total" style="color: var(--apple-green);">0</span>
-                <span class="stat-foot-note">Distractions averted</span>
-            </div>
-
-            <div class="stat-bento-card">
-                <span class="stat-icon-label" style="color: var(--apple-blue);">
-                    <span>⚡</span> Time Preserved
-                </span>
-                <span class="stat-val-huge" id="stat-time" style="color: var(--apple-cyan);">0m</span>
-                <span class="stat-foot-note">Estimated focus gained</span>
-            </div>
-
-            <div class="stat-bento-card">
-                <span class="stat-icon-label" style="color: var(--apple-purple);">
-                    <span>🎙️</span> Deep-Dives Allowed
-                </span>
-                <span class="stat-val-huge" id="stat-allowed" style="color: var(--apple-purple);">0</span>
-                <span class="stat-foot-note">Podcasts & lectures</span>
-            </div>
-
-            <div class="stat-bento-card">
-                <span class="stat-icon-label" style="color: var(--apple-orange);">
-                    <span>📊</span> Peak Distraction
-                </span>
-                <span class="stat-val-huge" id="stat-peak" style="font-size: 1.85rem; color: var(--apple-orange);">--:--</span>
-                <span class="stat-foot-note">Learned from Safari/Arc</span>
+        <!-- Bento Metrics Strip -->
+        <section class="am-section">
+            <div class="metrics-grid">
+                <div class="metric-cell">
+                    <span class="metric-label">[ TELEM.01 ] PAUSES_TODAY</span>
+                    <span class="metric-value" id="stat-total" style="color: #34d399;">0</span>
+                    <span class="metric-sub">Distraction impulses averted</span>
+                </div>
+                <div class="metric-cell">
+                    <span class="metric-label">[ TELEM.02 ] TIME_PRESERVED</span>
+                    <span class="metric-value" id="stat-time" style="color: #60a5fa;">0m</span>
+                    <span class="metric-sub">Cognitive focus protected</span>
+                </div>
+                <div class="metric-cell">
+                    <span class="metric-label">[ TELEM.03 ] TALKS_PERMITTED</span>
+                    <span class="metric-value" id="stat-allowed" style="color: #c084fc;">0</span>
+                    <span class="metric-sub">Podcasts & deep dives allowed</span>
+                </div>
+                <div class="metric-cell">
+                    <span class="metric-label">[ TELEM.04 ] PEAK_VULNERABILITY</span>
+                    <span class="metric-value" id="stat-peak" style="font-size: 22px; color: #fbbf24;">--:--</span>
+                    <span class="metric-sub">Learned from history database</span>
+                </div>
             </div>
         </section>
 
-        <!-- 2-Column Split: Screen Time Matrix & Focus Sprint Timer -->
-        <div class="split-grid-2col">
-            <!-- Left: Screen Time Distraction Insights -->
-            <section class="glass-card">
-                <div class="card-header-row">
-                    <div class="card-title-group">
-                        <span class="card-eyebrow">Screen Time Analytics</span>
-                        <h2 class="card-title">Reflex Frequency</h2>
+        <!-- 2-Column Split: Distraction Matrix & Focus Stopwatch -->
+        <section class="am-section">
+            <div class="split-2col">
+                <!-- Left: History Frequency Matrix -->
+                <div class="quota-box" style="padding: 24px;">
+                    <div class="section-header" style="margin-bottom: 12px;">
+                        <span class="eyebrow">[03] REFLEX_FREQUENCY // DISTRACTIONS</span>
+                        <span style="font-family: var(--font-display); font-size: 11px; color: var(--text-40);" id="sync-indicator">LIVE SYNC</span>
                     </div>
-                    <span class="nav-meta-item" id="sync-indicator">Live Synced</span>
-                </div>
-                <div class="screen-time-table" id="matrix-container">
-                    <div style="color: var(--text-tertiary); text-align: center; padding: 2rem 0; font-size: 0.85rem;">
-                        Analyzing browser history database...
+                    <div class="matrix-table" id="matrix-container">
+                        <div style="color: var(--text-40); text-align: center; padding: 2rem 0; font-family: var(--font-display); font-size: 12px;">
+                            Analyzing browser history database...
+                        </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Right: Apple Clock Style Focus Sprint Timer -->
-            <section class="glass-card">
-                <div class="card-header-row">
-                    <div class="card-title-group">
-                        <span class="card-eyebrow">Single-Task Sprint</span>
-                        <h2 class="card-title">Focus Block</h2>
-                    </div>
-                    <span class="pill-badge" style="background: rgba(255, 255, 255, 0.08); color: var(--text-secondary); border-color: rgba(255, 255, 255, 0.12);">
-                        25 Min
-                    </span>
-                </div>
-                <div class="timer-stage">
-                    <div class="timer-digits" id="chrono-text">25:00</div>
-                    <div class="timer-controls">
-                        <button class="timer-primary-btn" id="chrono-toggle-btn" onclick="toggleChrono()">
-                            <span id="chrono-btn-label">Start Block</span>
-                            <span class="shortcut-pill">Space</span>
+                <!-- Right: Focus Sprint Stopwatch -->
+                <div class="stopwatch-panel">
+                    <span class="eyebrow">[04] SPRINT_CADENCE // 25M</span>
+                    <div class="stopwatch-digits" id="chrono-text">25:00</div>
+                    <div class="stopwatch-actions">
+                        <button class="am-btn-primary" onclick="toggleChrono()">
+                            <span class="am-btn-primary-label">Start Block</span>
                         </button>
-                        <button class="timer-secondary-btn" onclick="resetChrono()">
-                            <span>Reset</span>
-                            <span class="shortcut-pill">R</span>
+                        <button class="am-btn-secondary" onclick="resetChrono()">
+                            <span>Reset (R)</span>
                         </button>
                     </div>
-                    <div style="font-size: 0.75rem; color: var(--text-tertiary); text-align: center;">
-                        Dedicated sprint with zero tab switching.
+                    <div style="font-size: 11px; color: var(--text-40); font-family: var(--font-display); margin-top: 6px;">
+                        Target: Single-task focus with zero tab switching.
                     </div>
                 </div>
-            </section>
-        </div>
-
-        <!-- macOS Dock Launchpad Intentional Workspaces -->
-        <section class="glass-card">
-            <div class="card-header-row">
-                <div class="card-title-group">
-                    <span class="card-eyebrow">Quick Workspaces</span>
-                    <h2 class="card-title">Intentional Portals</h2>
-                </div>
-                <span class="nav-meta-item">Keys 1 – 6</span>
-            </div>
-            <div class="dock-portals-grid" id="portals-container">
-                <!-- Dynamically injected from active persona -->
             </div>
         </section>
 
-        <!-- System Pill Footer -->
-        <div class="system-pill-footer">
+        <!-- Quick Workspaces Grid -->
+        <section class="am-section">
+            <div class="section-header">
+                <span class="eyebrow">[05] INTENTIONAL_PORTALS // HOTKEYS</span>
+                <span style="font-family: var(--font-display); font-size: 11px; color: var(--text-40);">KEYS: [ 1 - 6 ]</span>
+            </div>
+            <div class="portals-grid" id="portals-container">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+        <!-- Bottom Command Status Strip -->
+        <div class="cli-status-bar">
             <div>
-                <b>Reflex Guard</b> • <span id="cli-feedback">Active • Protection Enabled</span>
+                <b>REFLEX_DAEMON</b>: <span id="cli-feedback">status --guard=active --mode=calm</span>
             </div>
             <div>
-                Shortcuts: <b>Space</b> (Timer) • <b>R</b> (Reset) • <b>M</b> (Audio) • <b>1-6</b> (Portals)
+                HOTKEYS: <b>SPACE</b> (TIMER) • <b>R</b> (RESET) • <b>M</b> (AUDIO) • <b>1-6</b> (PORTALS)
             </div>
         </div>
 
         <footer>
-            Designed for macOS • Local SQLite & Neural Decision Engine
+            ASCII Magic Design System • Local Neural Decision Engine • Port 5050
         </footer>
     </div>
 
     <script>
-        // --- 1. Sound Synthesis Engine (Web Audio API) ---
+        // --- 1. Audio Engine (Web Audio API) ---
         let audioCtx = null;
         let sfxEnabled = localStorage.getItem('reflex_sfx') !== 'false';
 
         function getAudioContext() {
             if (!sfxEnabled) return null;
             if (!audioCtx) {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) audioCtx = new AudioContextClass();
+                const AudioClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioClass) audioCtx = new AudioClass();
             }
             if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume();
@@ -1194,12 +988,10 @@
             localStorage.setItem('reflex_sfx', sfxEnabled);
             const btn = document.getElementById('audio-toggle-btn');
             if (sfxEnabled) {
-                btn.classList.add('active');
-                btn.innerHTML = '<span>🔊</span><span>Sound: 432Hz</span>';
+                btn.innerHTML = '<span>🔊 432Hz</span>';
                 playTibetanBowl(432, 2.0, 0.15);
             } else {
-                btn.classList.remove('active');
-                btn.innerHTML = '<span>🔇</span><span>Sound: Muted</span>';
+                btn.innerHTML = '<span>🔇 Muted</span>';
             }
         }
 
@@ -1209,7 +1001,7 @@
             }
         }, { once: true });
 
-        // --- 2. Live Cupertino Status Clock ---
+        // --- 2. Live Status Clock ---
         function updateClock() {
             const d = new Date();
             document.getElementById('time-display').innerText = d.toLocaleTimeString([], { hour12: false });
@@ -1217,38 +1009,88 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // --- 3. Apple Watch Mindfulness Breath Cycle ---
-        const lotus = document.getElementById('lotus-flower');
-        const breathStateLabel = document.getElementById('breath-state');
+        // --- 3. Live ASCII Magic Canvas Visualizer ---
+        const canvas = document.getElementById('ascii-live-canvas');
+        const ctx = canvas.getContext('2d');
+        let currentMode = 'characters';
 
-        function runBreatheCycle() {
-            // Inhale phase (4 seconds)
-            lotus.classList.remove('exhale');
-            lotus.classList.add('inhale');
-            breathStateLabel.innerText = "Inhale Gently";
+        const rampChars = "@#%W$*+=-:. ";
+        const rampHalftone = "●◐○◌· ";
+        const rampBlocks = "██▓▓▒▒░░  ";
 
-            setTimeout(() => {
-                // Hold phase (2 seconds)
-                breathStateLabel.innerText = "Hold & Center";
+        let breathPhase = 0; // 0: inhale, 1: hold, 2: exhale, 3: rest
+        let breathT = 0;
 
-                setTimeout(() => {
-                    // Exhale phase (4 seconds)
-                    lotus.classList.remove('inhale');
-                    lotus.classList.add('exhale');
-                    breathStateLabel.innerText = "Release Slowly";
+        function resizeCanvas() {
+            if (!canvas) return;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-                    setTimeout(() => {
-                        // Rest phase (2 seconds)
-                        breathStateLabel.innerText = "Be Still";
-                    }, 4000);
-                }, 2000);
-            }, 4000);
+        function setAsciiMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.am-tag-btn').forEach(b => b.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
         }
 
-        runBreatheCycle();
-        setInterval(runBreatheCycle, 12000);
+        function renderAsciiCanvas() {
+            if (!ctx || !canvas) return;
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // --- 4. Focus Sprint Timer Module ---
+            const fontSize = 12;
+            ctx.font = `${fontSize}px "Space Mono", monospace`;
+
+            let ramp = rampChars;
+            if (currentMode === 'halftone') ramp = rampHalftone;
+            if (currentMode === 'blocks') ramp = rampBlocks;
+
+            const cols = Math.floor(canvas.width / (fontSize * 0.65));
+            const rows = Math.floor(canvas.height / fontSize);
+
+            const time = Date.now() * 0.002;
+            const expansion = Math.sin(time * 0.8) * 0.5 + 0.5; // 0 to 1
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const dx = c - cols / 2;
+                    const dy = (r - rows / 2) * 1.6;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    // Wave formula
+                    const wave = Math.sin(dist * 0.25 - time * 2) * 0.5 + 0.5;
+                    const val = (wave * expansion * (1 - dist / (cols * 0.75)));
+                    const idx = Math.floor(Math.max(0, Math.min(1, val)) * (ramp.length - 1));
+
+                    const ch = ramp[idx];
+                    const alpha = Math.max(0.08, val * 0.85);
+
+                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                    ctx.fillText(ch, c * (fontSize * 0.65), (r + 1) * fontSize);
+                }
+            }
+
+            requestAnimationFrame(renderAsciiCanvas);
+        }
+        requestAnimationFrame(renderAsciiCanvas);
+
+        // Breath text cycle
+        const breathStates = [
+            "INHALE GENTLY . . .",
+            "HOLD MOMENTARILY . .",
+            "RELEASE & SOFTEN . .",
+            "STILLNESS . . . . ."
+        ];
+        let breathIdx = 0;
+        setInterval(() => {
+            breathIdx = (breathIdx + 1) % breathStates.length;
+            const el = document.getElementById('breath-state');
+            if (el) el.innerText = breathStates[breathIdx];
+        }, 3000);
+
+        // --- 4. Chronometer Sprint Timer ---
         let chronoSeconds = 25 * 60;
         let chronoTimer = null;
         let isChronoRunning = false;
@@ -1261,17 +1103,14 @@
 
         function toggleChrono() {
             playClick();
-            const btn = document.getElementById('chrono-toggle-btn');
             const lbl = document.getElementById('chrono-btn-label');
             if (isChronoRunning) {
                 clearInterval(chronoTimer);
                 isChronoRunning = false;
-                lbl.innerText = 'Resume Block';
-                btn.classList.remove('running');
+                if (lbl) lbl.innerText = 'Resume Block';
             } else {
                 isChronoRunning = true;
-                lbl.innerText = 'Pause Block';
-                btn.classList.add('running');
+                if (lbl) lbl.innerText = 'Pause Block';
                 playTibetanBowl(432, 2.5, 0.2);
                 chronoTimer = setInterval(() => {
                     if (chronoSeconds > 0) {
@@ -1280,10 +1119,9 @@
                     } else {
                         clearInterval(chronoTimer);
                         isChronoRunning = false;
-                        lbl.innerText = 'Start Block';
-                        btn.classList.remove('running');
+                        if (lbl) lbl.innerText = 'Start Block';
                         playTibetanBowl(528, 5.0, 0.35);
-                        alert("Reflex Focus Block complete. Take a 5-minute break.");
+                        alert("[REFLEX] Focus block complete. Take a 5-minute pause.");
                         resetChrono();
                     }
                 }, 1000);
@@ -1296,8 +1134,8 @@
             isChronoRunning = false;
             chronoSeconds = 25 * 60;
             updateChronoDisplay();
-            document.getElementById('chrono-btn-label').innerText = 'Start Block';
-            document.getElementById('chrono-toggle-btn').classList.remove('running');
+            const lbl = document.getElementById('chrono-btn-label');
+            if (lbl) lbl.innerText = 'Start Block';
         }
 
         // --- 5. Persona Switcher & Workspaces ---
@@ -1314,8 +1152,8 @@
             container.innerHTML = currentProfiles.map(p => {
                 const isActive = p.id === activeId;
                 return `
-                    <button class="segment-btn ${isActive ? 'active' : ''}" onclick="selectProfile('${p.id}')">
-                        <span>${p.badge}</span>
+                    <button class="pill ${isActive ? 'active' : ''}" onclick="selectProfile('${p.id}')">
+                        <span class="pill-badge">${p.badge}</span>
                         <span>${p.name}</span>
                     </button>
                 `;
@@ -1324,6 +1162,7 @@
             const activeP = currentProfiles.find(p => p.id === activeId);
             if (activeP) {
                 document.getElementById('active-profile-tagline').innerText = activeP.tagline;
+                document.getElementById('rotator-word').innerText = activeP.name;
                 renderPortals(activeP.portals);
             }
         }
@@ -1358,10 +1197,10 @@
                 const num = idx + 1;
                 const icon = portalIcons[item.tag] || '🚀';
                 return `
-                    <a href="${item.url}" target="_blank" class="portal-app-tile" onclick="playClick()">
-                        <span class="portal-key-shortcut">⌘${num}</span>
-                        <div class="portal-icon-squircle">${icon}</div>
-                        <span class="portal-app-name">${item.name}</span>
+                    <a href="${item.url}" target="_blank" class="portal-item" onclick="playClick()">
+                        <span class="portal-key">[${num}]</span>
+                        <div class="portal-glyph">${icon}</div>
+                        <span class="portal-label">${item.name}</span>
                     </a>
                 `;
             }).join('');
@@ -1376,12 +1215,13 @@
                     activeProfileId = data.active;
                     if (data.profile) {
                         document.getElementById('active-profile-tagline').innerText = data.profile.tagline;
+                        document.getElementById('rotator-word').innerText = data.profile.name;
                         renderPortals(data.profile.portals);
                     }
-                    document.querySelectorAll('.segment-btn').forEach(btn => {
+                    document.querySelectorAll('.pill').forEach(btn => {
                         btn.classList.remove('active');
                     });
-                    const btns = document.querySelectorAll('.segment-btn');
+                    const btns = document.querySelectorAll('.pill');
                     currentProfiles.forEach((p, i) => {
                         if (p.id === id && btns[i]) btns[i].classList.add('active');
                     });
@@ -1389,7 +1229,7 @@
                     playTibetanBowl(432, 1.5, 0.15);
                 }
             } catch (e) {
-                console.error("Profile selection error", e);
+                console.error("Profile switch error", e);
             }
         }
 
@@ -1405,7 +1245,7 @@
             }
         }
 
-        // --- 6. Hotkeys (Apple Style) ---
+        // --- 6. Hotkeys ---
         window.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT') return;
 
@@ -1420,13 +1260,19 @@
                 const idx = parseInt(e.key) - 1;
                 if (currentPortals && currentPortals[idx]) {
                     playClick();
-                    document.getElementById('cli-feedback').innerText = `Opening [${currentPortals[idx].name}] → ${currentPortals[idx].url}`;
+                    document.getElementById('cli-feedback').innerText = `open portal [${e.key}] -> ${currentPortals[idx].url}`;
                     setTimeout(() => window.open(currentPortals[idx].url, '_blank'), 150);
                 }
             }
         });
 
         // --- 7. Live Telemetry Fetching ---
+        function renderAsciiFill(pct) {
+            const totalChars = 16;
+            const filled = Math.round((pct / 100) * totalChars);
+            return '█'.repeat(filled) + '░'.repeat(totalChars - filled);
+        }
+
         async function fetchTelemetry() {
             try {
                 const [statsRes, histRes] = await Promise.all([
@@ -1447,15 +1293,15 @@
                         fetchProfiles();
                     }
 
-                    const profileBadge = stats.profile_details?.badge || 'Focus';
+                    const profileBadge = stats.profile_details?.badge || '[FOCUS]';
                     if (allowedList.length > 0) {
                         const last = allowedList[allowedList.length - 1];
-                        const titlePreview = (last.title || '').slice(0, 32);
+                        const titlePreview = (last.title || '').slice(0, 30);
                         document.getElementById('cli-feedback').innerText =
-                            `${profileBadge} Mode Active • Allowed: "${titlePreview}"`;
+                            `status ${profileBadge} --guard=active --allowed=[${titlePreview}]`;
                     } else {
                         document.getElementById('cli-feedback').innerText =
-                            `${profileBadge} Mode Active • Guarding cognitive flow`;
+                            `status ${profileBadge} --guard=active --mode=calm`;
                     }
 
                     // Mindful Entertainment Quota update
@@ -1464,37 +1310,27 @@
                         const epUsed = q.episodes_used || 0;
                         const epMax = q.episodes_max || 2;
                         const epRem = Math.max(0, epMax - epUsed);
+                        const epBar = '[ ' + '█ '.repeat(epUsed) + '░ '.repeat(epRem) + ']';
 
                         const movUsed = q.movies_used || 0;
                         const movMax = q.movies_max || 1;
                         const movRem = Math.max(0, movMax - movUsed);
+                        const movBar = '[ ' + '█ '.repeat(movUsed) + '░ '.repeat(movRem) + ']';
 
                         const epRatioEl = document.getElementById('quota-ep-ratio');
                         if (epRatioEl) epRatioEl.innerText = `${epUsed} / ${epMax}`;
-
-                        // Update capsule segments for TV series
-                        const seg1 = document.getElementById('ep-seg-1');
-                        const seg2 = document.getElementById('ep-seg-2');
-                        if (seg1) {
-                            if (epUsed >= 1) seg1.classList.add('filled-series');
-                            else seg1.classList.remove('filled-series');
-                        }
-                        if (seg2) {
-                            if (epUsed >= 2) seg2.classList.add('filled-series');
-                            else seg2.classList.remove('filled-series');
-                        }
-
+                        const epBarEl = document.getElementById('quota-ep-bar');
+                        if (epBarEl) epBarEl.innerText = epBar;
                         const epStatusEl = document.getElementById('quota-ep-status');
                         if (epStatusEl) {
                             if (epRem === 0) {
-                                epStatusEl.innerText = 'Limit Reached';
-                                epStatusEl.className = 'quota-pill-status limit';
+                                epStatusEl.innerText = 'LIMIT REACHED';
+                                epStatusEl.className = 'quota-remaining-badge limit';
                             } else {
-                                epStatusEl.innerText = `${epRem} Remaining`;
-                                epStatusEl.className = 'quota-pill-status';
+                                epStatusEl.innerText = `${epRem} REMAINING`;
+                                epStatusEl.className = 'quota-remaining-badge';
                             }
                         }
-
                         const epDescEl = document.getElementById('quota-ep-desc');
                         if (epDescEl) {
                             if (q.episodes_list && q.episodes_list.length > 0) {
@@ -1505,27 +1341,20 @@
                             }
                         }
 
-                        // Update capsule segment for movies
                         const movRatioEl = document.getElementById('quota-movie-ratio');
                         if (movRatioEl) movRatioEl.innerText = `${movUsed} / ${movMax}`;
-
-                        const movSeg1 = document.getElementById('mov-seg-1');
-                        if (movSeg1) {
-                            if (movUsed >= 1) movSeg1.classList.add('filled-movie');
-                            else movSeg1.classList.remove('filled-movie');
-                        }
-
+                        const movBarEl = document.getElementById('quota-movie-bar');
+                        if (movBarEl) movBarEl.innerText = movBar;
                         const movStatusEl = document.getElementById('quota-movie-status');
                         if (movStatusEl) {
                             if (movRem === 0) {
-                                movStatusEl.innerText = 'Limit Reached';
-                                movStatusEl.className = 'quota-pill-status limit';
+                                movStatusEl.innerText = 'LIMIT REACHED';
+                                movStatusEl.className = 'quota-remaining-badge limit';
                             } else {
-                                movStatusEl.innerText = `${movRem} Remaining`;
-                                movStatusEl.className = 'quota-pill-status';
+                                movStatusEl.innerText = `${movRem} REMAINING`;
+                                movStatusEl.className = 'quota-remaining-badge';
                             }
                         }
-
                         const movDescEl = document.getElementById('quota-movie-desc');
                         if (movDescEl) {
                             if (q.movies_list && q.movies_list.length > 0) {
@@ -1538,7 +1367,7 @@
 
                         const statusLbl = document.getElementById('quota-status-label');
                         if (statusLbl) {
-                            statusLbl.innerText = `Series: ${epUsed}/${epMax} Eps • Movies: ${movUsed}/${movMax} Film`;
+                            statusLbl.innerText = `SERIES: ${epUsed}/${epMax} EPS | MOVIES: ${movUsed}/${movMax} FILM`;
                         }
                     }
                 }
@@ -1559,20 +1388,18 @@
                         container.innerHTML = top.slice(0, 5).map(item => {
                             const pct = Math.round((item.count / maxCount) * 100);
                             return `
-                                <div class="screen-time-row">
-                                    <span class="st-domain-label" title="${item.domain}">${item.domain}</span>
-                                    <div class="st-track-outer">
-                                        <div class="st-track-fill" style="width: ${pct}%;"></div>
-                                    </div>
-                                    <span class="st-count-label">${item.count}</span>
+                                <div class="matrix-row">
+                                    <span class="matrix-host">${item.domain}</span>
+                                    <span class="matrix-ascii-fill">[ ${renderAsciiFill(pct)} ]</span>
+                                    <span class="matrix-count">${item.count}</span>
                                 </div>
                             `;
                         }).join('');
                     }
                 }
-                document.getElementById('sync-indicator').innerText = 'Live Synced';
+                document.getElementById('sync-indicator').innerText = 'LIVE SYNC';
             } catch (e) {
-                document.getElementById('sync-indicator').innerText = 'Local Mode';
+                document.getElementById('sync-indicator').innerText = 'LOCAL MODE';
             }
         }
 
