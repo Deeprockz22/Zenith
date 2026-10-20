@@ -115,6 +115,83 @@ except Exception as e:
     fi
 }
 
+quota() {
+    sub="$2"
+    if [ "$sub" = "reset" ]; then
+        python3 -c "
+import urllib.request, json
+try:
+    with urllib.request.urlopen('http://localhost:5050/api/quota/reset') as res:
+        d = json.loads(res.read().decode())
+        print('✅ Daily entertainment quota reset!')
+        print(f'   Series: 0/{d.get(\"episodes_max\", 2)} | Movies: 0/{d.get(\"movies_max\", 1)}')
+except Exception as e:
+    import sys
+    sys.path.append('$DIR')
+    from quota_manager import reset_quota_today
+    d = reset_quota_today()
+    print('✅ Daily entertainment quota reset (direct)!')
+    print(f'   Series: 0/{d.get(\"episodes_max\", 2)} | Movies: 0/{d.get(\"movies_max\", 1)}')
+"
+    elif [ "$sub" = "set" ]; then
+        eps="${3:-2}"
+        movs="${4:-1}"
+        python3 -c "
+import urllib.request, json
+try:
+    with urllib.request.urlopen(f'http://localhost:5050/api/quota/set?episodes=$eps&movies=$movs') as res:
+        d = json.loads(res.read().decode())
+        print(f'✅ Entertainment quota limits updated: Max {d.get(\"episodes_max\")} episodes, {d.get(\"movies_max\")} movies per day.')
+except Exception as e:
+    import sys
+    sys.path.append('$DIR')
+    from quota_manager import set_quota_limits
+    d = set_quota_limits($eps, $movs)
+    print(f'✅ Entertainment quota limits updated (direct): Max {d.get(\"episodes_max\")} episodes, {d.get(\"movies_max\")} movies per day.')
+"
+    else
+        echo "══════════════════════════════════════════════════════════════════"
+        echo "🎬 MINDFUL ENTERTAINMENT QUOTA (DAILY LIMITS)"
+        echo "══════════════════════════════════════════════════════════════════"
+        python3 -c "
+import urllib.request, json
+try:
+    with urllib.request.urlopen('http://localhost:5050/api/quota') as res:
+        d = json.loads(res.read().decode())
+except Exception:
+    import sys
+    sys.path.append('$DIR')
+    from quota_manager import get_quota_summary
+    d = get_quota_summary()
+
+ep_u = d.get('episodes_used', 0)
+ep_m = d.get('episodes_max', 2)
+ep_r = d.get('episodes_remaining', 2)
+ep_bar = '[' + ' █' * ep_u + ' ░' * ep_r + ' ]'
+
+mov_u = d.get('movies_used', 0)
+mov_m = d.get('movies_max', 1)
+mov_r = d.get('movies_remaining', 1)
+mov_bar = '[' + ' █' * mov_u + ' ░' * mov_r + ' ]'
+
+print(f'📅 Date       : {d.get(\"date\")}')
+print(f'📺 TV Series  : {ep_bar} ({ep_u}/{ep_m} used, {ep_r} remaining)')
+if d.get('episodes_list'):
+    for item in d['episodes_list']:
+        print(f'               • {item.get(\"title\", \"Episode\")[:50]}')
+print(f'🎬 Movies     : {mov_bar} ({mov_u}/{mov_m} used, {mov_r} remaining)')
+if d.get('movies_list'):
+    for item in d['movies_list']:
+        print(f'               • {item.get(\"title\", \"Movie\")[:50]}')
+"
+        echo "──────────────────────────────────────────────────────────────────"
+        echo "💡 Commands:"
+        echo "   ./focus.sh quota reset              (reset today's count)"
+        echo "   ./focus.sh quota set <eps> <movies> (e.g. ./focus.sh quota set 2 1)"
+        echo "══════════════════════════════════════════════════════════════════"
+    fi
+}
+
 run_fg() {
     export PATH="$DIR/.venv/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
     exec "$PYTHON_BIN" "$DAEMON_SCRIPT"
@@ -136,6 +213,9 @@ case "$1" in
     profile)
         profile "$@"
         ;;
+    quota)
+        quota "$@"
+        ;;
     open)
         open_dashboard
         ;;
@@ -145,7 +225,7 @@ case "$1" in
         start
         ;;
     *)
-        echo "Usage: $0 {start|stop|status|restart|open|profile [id]}"
+        echo "Usage: $0 {start|stop|status|restart|open|profile [id]|quota [reset|set]}"
         exit 1
         ;;
 esac

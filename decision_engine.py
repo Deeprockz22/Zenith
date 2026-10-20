@@ -183,6 +183,32 @@ def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
                     "confidence": conf
                 }
             else:
+                # Check Daily Entertainment Quota (Max 2 episodes, 1 movie per day)
+                if profile.get("id") != "zen":
+                    from quota_manager import detect_media_format, check_entertainment_quota
+                    media_fmt = detect_media_format(url, title_clean, decider=decider)
+                    if media_fmt in ("episode", "movie"):
+                        q_res = check_entertainment_quota(url, title_clean, media_fmt)
+                        if q_res.get("allowed"):
+                            label = "Series Episode" if media_fmt == "episode" else "Feature Movie"
+                            return {
+                                "action": "ALLOW",
+                                "reason": f"Quota Allowed: {label} ({q_res['used']}/{q_res['max']} today)",
+                                "category": "entertainment_quota_allowed",
+                                "domain": host,
+                                "model": "quota-manager",
+                                "quota_info": q_res
+                            }
+                        else:
+                            return {
+                                "action": "REDIRECT",
+                                "reason": q_res.get("reason", "Daily entertainment quota reached"),
+                                "category": "entertainment",
+                                "domain": host,
+                                "model": "quota-manager",
+                                "quota_info": q_res
+                            }
+
                 return {
                     "action": "REDIRECT",
                     "reason": f"Jev ({profile['badge']}) classified as {choice} ({conf*100:.0f}%)",
@@ -212,6 +238,32 @@ def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
             "domain": host,
             "model": "heuristic-fallback"
         }
+
+    # Check Daily Entertainment Quota for series & movies in heuristic fallback
+    if profile.get("id") != "zen":
+        from quota_manager import detect_media_format, check_entertainment_quota
+        media_fmt = detect_media_format(url, title_clean)
+        if media_fmt in ("episode", "movie"):
+            q_res = check_entertainment_quota(url, title_clean, media_fmt)
+            if q_res.get("allowed"):
+                label = "Series Episode" if media_fmt == "episode" else "Feature Movie"
+                return {
+                    "action": "ALLOW",
+                    "reason": f"Quota Allowed: {label} ({q_res['used']}/{q_res['max']} today)",
+                    "category": "entertainment_quota_allowed",
+                    "domain": host,
+                    "model": "quota-manager",
+                    "quota_info": q_res
+                }
+            else:
+                return {
+                    "action": "REDIRECT",
+                    "reason": q_res.get("reason", "Daily entertainment quota reached"),
+                    "category": "entertainment",
+                    "domain": host,
+                    "model": "quota-manager",
+                    "quota_info": q_res
+                }
 
     return {
         "action": "REDIRECT",

@@ -19,6 +19,7 @@ from urllib.parse import urlparse
 from decision_engine import evaluate_tab
 from history_reader import analyze_history
 from profiles import get_profile, serialize_profile, list_profiles, PROFILES, DEFAULT_PROFILE_ID
+from quota_manager import get_quota_summary, reset_quota_today, set_quota_limits
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATS_FILE = os.path.join(BASE_DIR, "focus_stats.json")
@@ -215,6 +216,22 @@ def tab_watcher_loop():
                         last_intercepted_url = url
                         label = "Podcast" if decision.get("category") == "podcast_exception" else "Educational"
                         record_allowed_exception(domain, title, decision.get("reason", label))
+                elif decision.get("category") == "entertainment_quota_allowed":
+                    # Record entertainment quota exception
+                    if url != last_intercepted_url:
+                        last_intercepted_url = url
+                        reason = decision.get("reason", "Daily Quota Allowed")
+                        q_info = decision.get("quota_info", {})
+                        if not q_info.get("is_existing"):
+                            m_type = "TV Episode" if q_info.get("media_type") == "episode" else "Feature Movie"
+                            used = q_info.get("used", 1)
+                            max_val = q_info.get("max", 2)
+                            sub = f"Daily Quota: {m_type} {used}/{max_val} allowed"
+                            apple_script = f'''
+                            display notification "{title[:40]}" with title "Mindful Entertainment 🎬" subtitle "{sub}"
+                            '''
+                            subprocess.run(["osascript", "-e", apple_script], capture_output=True)
+                        record_allowed_exception(domain, title, reason)
 
             time.sleep(0.8)
         except Exception:
@@ -233,6 +250,7 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
                 stats_copy = dict(stats)
                 stats_copy["active_profile"] = act
                 stats_copy["profile_details"] = serialize_profile(get_profile(act))
+                stats_copy["quota"] = get_quota_summary()
                 data = json.dumps(stats_copy).encode("utf-8")
             self.wfile.write(data)
         elif parsed.path == "/api/history":
@@ -291,6 +309,34 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(b'{"status": "reset"}')
+        elif parsed.path == "/api/quota":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            data = json.dumps(get_quota_summary()).encode("utf-8")
+            self.wfile.write(data)
+        elif parsed.path == "/api/quota/reset":
+            summary = reset_quota_today()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(summary).encode("utf-8"))
+        elif parsed.path == "/api/quota/set":
+            from urllib.parse import parse_qs
+            qs = parse_qs(parsed.query)
+            max_ep = qs.get("episodes", [2])[0]
+            max_mov = qs.get("movies", [1])[0]
+            try:
+                summary = set_quota_limits(int(max_ep), int(max_mov))
+            except Exception as e:
+                summary = {"error": str(e)}
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(summary).encode("utf-8"))
         else:
             try:
                 with open(DASHBOARD_FILE, "rb") as f:
@@ -329,6 +375,28 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             except Exception as e:
                 resp = {"error": str(e)}
 
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
+        elif parsed.path == "/api/quota/set":
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                body = json.loads(post_data.decode('utf-8'))
+                max_ep = body.get("episodes", 2)
+                max_mov = body.get("movies", 1)
+                resp = set_quota_limits(int(max_ep), int(max_mov))
+            except Exception as e:
+                resp = {"error": str(e)}
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
+        elif parsed.path == "/api/quota/reset":
+            resp = reset_quota_today()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")

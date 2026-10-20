@@ -19,6 +19,7 @@ focus.err.log
 
 # User statistics & local data
 focus_stats.json
+entertainment_quota.json
 
 # macOS metadata
 .DS_Store

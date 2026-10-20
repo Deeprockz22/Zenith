@@ -604,6 +604,48 @@
             </div>
         </div>
 
+        <!-- Mindful Entertainment Quota Box -->
+        <div class="box">
+            <div class="box-header">
+                <div><span class="tag-id">[01B]</span> MINDFUL_ENTERTAINMENT // DAILY_QUOTA</div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="color: var(--amber); font-size: 0.72rem; font-weight: 500;" id="quota-status-label">
+                        SERIES: 0/2 EPS | MOVIES: 0/1 FILM
+                    </span>
+                    <button class="term-btn" onclick="resetQuota()" style="font-size: 0.65rem; padding: 0.15rem 0.5rem;">RESET_QUOTA</button>
+                </div>
+            </div>
+            <div class="box-body" style="padding: 1rem 1.25rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <!-- TV Series Card -->
+                    <div class="telem-cell" style="padding: 0.85rem 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="telem-key">📺 TV SERIES (MAX 2 EPS / DAY)</span>
+                            <span id="quota-ep-status" style="font-size: 0.72rem; color: var(--green); font-weight: 600;">2 REMAINING</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 0.75rem; margin: 0.35rem 0;">
+                            <span class="telem-val" id="quota-ep-ratio" style="font-size: 1.5rem; color: var(--text-main);">0 / 2</span>
+                            <span id="quota-ep-bar" style="font-family: var(--font-mono); color: var(--cyan); letter-spacing: 0.1em; font-size: 0.95rem;">[ ░ ░ ]</span>
+                        </div>
+                        <div class="telem-sub" id="quota-ep-desc">Watched: None yet today</div>
+                    </div>
+
+                    <!-- Movie Card -->
+                    <div class="telem-cell" style="padding: 0.85rem 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="telem-key">🎬 FEATURE MOVIE (MAX 1 / DAY)</span>
+                            <span id="quota-movie-status" style="font-size: 0.72rem; color: var(--green); font-weight: 600;">1 REMAINING</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 0.75rem; margin: 0.35rem 0;">
+                            <span class="telem-val" id="quota-movie-ratio" style="font-size: 1.5rem; color: var(--text-main);">0 / 1</span>
+                            <span id="quota-movie-bar" style="font-family: var(--font-mono); color: var(--amber); letter-spacing: 0.1em; font-size: 0.95rem;">[ ░ ]</span>
+                        </div>
+                        <div class="telem-sub" id="quota-movie-desc">Watched: None yet today</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Main 2-Column Section -->
         <div class="grid-2col">
             <!-- Left: Distraction Matrix & Recent History -->
@@ -1011,6 +1053,73 @@
                         document.getElementById('cli-feedback').innerText =
                             `status ${profileBadge} --guard=active --mode=calm`;
                     }
+
+                    // Mindful Entertainment Quota update
+                    if (stats.quota) {
+                        const q = stats.quota;
+                        const epUsed = q.episodes_used || 0;
+                        const epMax = q.episodes_max || 2;
+                        const epRem = Math.max(0, epMax - epUsed);
+                        const epBar = '[ ' + '█ '.repeat(epUsed) + '░ '.repeat(epRem) + ']';
+
+                        const movUsed = q.movies_used || 0;
+                        const movMax = q.movies_max || 1;
+                        const movRem = Math.max(0, movMax - movUsed);
+                        const movBar = '[ ' + '█ '.repeat(movUsed) + '░ '.repeat(movRem) + ']';
+
+                        const epRatioEl = document.getElementById('quota-ep-ratio');
+                        if (epRatioEl) epRatioEl.innerText = `${epUsed} / ${epMax}`;
+                        const epBarEl = document.getElementById('quota-ep-bar');
+                        if (epBarEl) epBarEl.innerText = epBar;
+                        const epStatusEl = document.getElementById('quota-ep-status');
+                        if (epStatusEl) {
+                            if (epRem === 0) {
+                                epStatusEl.innerText = 'LIMIT REACHED';
+                                epStatusEl.style.color = 'var(--rose)';
+                            } else {
+                                epStatusEl.innerText = `${epRem} REMAINING`;
+                                epStatusEl.style.color = 'var(--green)';
+                            }
+                        }
+                        const epDescEl = document.getElementById('quota-ep-desc');
+                        if (epDescEl) {
+                            if (q.episodes_list && q.episodes_list.length > 0) {
+                                const lastEp = q.episodes_list[q.episodes_list.length - 1];
+                                epDescEl.innerText = `Latest: ${lastEp.title.slice(0, 36)}`;
+                            } else {
+                                epDescEl.innerText = 'Watched: None yet today';
+                            }
+                        }
+
+                        const movRatioEl = document.getElementById('quota-movie-ratio');
+                        if (movRatioEl) movRatioEl.innerText = `${movUsed} / ${movMax}`;
+                        const movBarEl = document.getElementById('quota-movie-bar');
+                        if (movBarEl) movBarEl.innerText = movBar;
+                        const movStatusEl = document.getElementById('quota-movie-status');
+                        if (movStatusEl) {
+                            if (movRem === 0) {
+                                movStatusEl.innerText = 'LIMIT REACHED';
+                                movStatusEl.style.color = 'var(--rose)';
+                            } else {
+                                movStatusEl.innerText = `${movRem} REMAINING`;
+                                movStatusEl.style.color = 'var(--green)';
+                            }
+                        }
+                        const movDescEl = document.getElementById('quota-movie-desc');
+                        if (movDescEl) {
+                            if (q.movies_list && q.movies_list.length > 0) {
+                                const lastMov = q.movies_list[q.movies_list.length - 1];
+                                movDescEl.innerText = `Latest: ${lastMov.title.slice(0, 36)}`;
+                            } else {
+                                movDescEl.innerText = 'Watched: None yet today';
+                            }
+                        }
+
+                        const statusLbl = document.getElementById('quota-status-label');
+                        if (statusLbl) {
+                            statusLbl.innerText = `SERIES: ${epUsed}/${epMax} EPS | MOVIES: ${movUsed}/${movMax} FILM`;
+                        }
+                    }
                 }
 
                 if (histRes.ok) {
@@ -1049,6 +1158,14 @@
             if (confirm("Reset current distraction logs?")) {
                 playClick();
                 await fetch('/api/reset');
+                fetchTelemetry();
+            }
+        }
+
+        async function resetQuota() {
+            if (confirm("Reset today's entertainment quota (2 episodes, 1 movie)?")) {
+                playClick();
+                await fetch('/api/quota/reset');
                 fetchTelemetry();
             }
         }
