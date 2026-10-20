@@ -9,6 +9,7 @@ import sys
 import threading
 from urllib.parse import urlparse
 from history_reader import KNOWN_ENTERTAINMENT_ROOTS, KNOWN_PRODUCTIVE_ROOTS, KNOWN_PODCAST_ROOTS
+from profiles import get_profile
 
 # Explicit keywords for podcast & long-form intellectual discussions
 PODCAST_KEYWORDS = [
@@ -67,14 +68,19 @@ def get_jev_decider():
         finally:
             _is_loading = False
 
-def evaluate_tab(url, title, recent_trajectory=None):
+def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
     """
     Evaluates whether an active browser tab should be allowed or redirected.
     Uses Tier 1 (fast whitelist) + Tier 2 (Jev single-pass neural decision) + Tier 3 (heuristics).
-    Explicitly permits educational content, podcasts, long-form talks, and interviews.
+    Adapts intelligently to the user's active Profile (Developer, Academic, Founder, Creator, General, Zen).
     """
     if not url:
         return {"action": "ALLOW", "reason": "Empty URL", "category": "neutral"}
+
+    profile = get_profile(profile_id)
+    productive_roots = KNOWN_PRODUCTIVE_ROOTS | profile.get("productive_domains", set())
+    allowed_types = profile.get("allowed_types", ["podcast", "lecture"])
+    profile_keywords = profile.get("allowed_keywords", [])
 
     parsed = urlparse(url)
     host = (parsed.hostname or "").lower()
@@ -86,7 +92,7 @@ def evaluate_tab(url, title, recent_trajectory=None):
     title_lower = title_clean.lower()
 
     # --- TIER 1A: Dedicated Podcast Platforms (< 0.1ms) ---
-    if any(host == p or host.endswith("." + p) for p in KNOWN_PODCAST_ROOTS):
+    if "podcast" in allowed_types and any(host == p or host.endswith("." + p) for p in KNOWN_PODCAST_ROOTS):
         return {
             "action": "ALLOW",
             "reason": f"Podcast audio platform ({host})",
@@ -95,11 +101,11 @@ def evaluate_tab(url, title, recent_trajectory=None):
             "model": "fast-whitelist"
         }
 
-    # --- TIER 1B: Instant Fast-Path for Known Productive Portals (< 0.1ms) ---
-    if any(host == p or host.endswith("." + p) for p in KNOWN_PRODUCTIVE_ROOTS):
+    # --- TIER 1B: Instant Fast-Path for Profile Productive Portals (< 0.1ms) ---
+    if any(host == p or host.endswith("." + p) for p in productive_roots):
         return {
             "action": "ALLOW",
-            "reason": f"Productive portal ({host})",
+            "reason": f"Productive for {profile['name']} ({host})",
             "category": "productive",
             "domain": host,
             "model": "fast-whitelist"
@@ -126,15 +132,15 @@ def evaluate_tab(url, title, recent_trajectory=None):
             "model": "fast-blacklist"
         }
 
-    # --- TIER 1D: Fast Whitelist for Unmistakable Podcasts & Lectures (< 0.1ms) ---
+    # --- TIER 1D: Fast Whitelist for Unmistakable Profile & Podcast Content (< 0.1ms) ---
     is_risk = any(kw in path or kw in title_lower for kw in HIGH_RISK_KEYWORDS)
-    is_explicit_podcast = any(kw in title_lower for kw in PODCAST_KEYWORDS)
-    is_explicit_edu = any(kw in title_lower for kw in EDUCATIONAL_KEYWORDS)
+    is_explicit_podcast = ("podcast" in allowed_types) and any(kw in title_lower for kw in PODCAST_KEYWORDS)
+    is_explicit_edu = ("lecture" in allowed_types) and any(kw in title_lower for kw in (EDUCATIONAL_KEYWORDS + profile_keywords))
 
     if is_explicit_podcast and not is_risk:
         return {
             "action": "ALLOW",
-            "reason": f"Allowed Podcast / Talk: {title_clean[:35]}",
+            "reason": f"Allowed Podcast / Talk ({profile['badge']}): {title_clean[:32]}",
             "category": "podcast_exception",
             "domain": host,
             "model": "fast-whitelist"
@@ -143,13 +149,13 @@ def evaluate_tab(url, title, recent_trajectory=None):
     if is_explicit_edu and not is_risk:
         return {
             "action": "ALLOW",
-            "reason": f"Allowed Educational: {title_clean[:35]}",
+            "reason": f"Allowed Content ({profile['badge']}): {title_clean[:32]}",
             "category": "educational_exception",
             "domain": host,
             "model": "fast-whitelist"
         }
 
-    # --- TIER 2: Jev Neural Decision Model (~47ms single forward pass) ---
+    # --- TIER 2: Jev Neural Decision Model with Active Persona Injection (~47ms) ---
     decider = get_jev_decider()
     if decider is not None and title_clean:
         try:
@@ -165,12 +171,12 @@ def evaluate_tab(url, title, recent_trajectory=None):
             choice = type_ans.choice
             conf = type_ans.confidence
 
-            if choice in ("podcast", "lecture"):
+            if choice in allowed_types:
                 category = "podcast_exception" if choice == "podcast" else "educational_exception"
-                label = "Podcast / Long-form talk" if choice == "podcast" else "Educational lecture"
+                label = "Podcast / Long-form talk" if choice == "podcast" else "Educational / Deep-dive"
                 return {
                     "action": "ALLOW",
-                    "reason": f"Jev allowed: {label} ({conf*100:.0f}% confidence)",
+                    "reason": f"Jev ({profile['badge']}) allowed: {label} ({conf*100:.0f}%)",
                     "category": category,
                     "domain": host,
                     "model": "jev-system-one",
@@ -179,7 +185,7 @@ def evaluate_tab(url, title, recent_trajectory=None):
             else:
                 return {
                     "action": "REDIRECT",
-                    "reason": f"Jev classified as {choice} ({conf*100:.0f}% confidence)",
+                    "reason": f"Jev ({profile['badge']}) classified as {choice} ({conf*100:.0f}%)",
                     "category": "entertainment",
                     "domain": host,
                     "model": "jev-system-one",
@@ -192,7 +198,7 @@ def evaluate_tab(url, title, recent_trajectory=None):
     if is_explicit_podcast and not is_risk:
         return {
             "action": "ALLOW",
-            "reason": f"Podcast context exception ({title_clean[:30]}...)",
+            "reason": f"Podcast context exception ({profile['badge']})",
             "category": "podcast_exception",
             "domain": host,
             "model": "heuristic-fallback"
@@ -201,7 +207,7 @@ def evaluate_tab(url, title, recent_trajectory=None):
     if is_explicit_edu and not is_risk:
         return {
             "action": "ALLOW",
-            "reason": f"Educational context exception ({title_clean[:30]}...)",
+            "reason": f"Profile context exception ({profile['badge']})",
             "category": "educational_exception",
             "domain": host,
             "model": "heuristic-fallback"
@@ -217,19 +223,19 @@ def evaluate_tab(url, title, recent_trajectory=None):
 
 if __name__ == "__main__":
     test_cases = [
-        ("https://www.youtube.com/watch?v=1", "Lex Fridman Podcast #400 – Jeff Bezos"),
-        ("https://www.youtube.com/watch?v=2", "Huberman Lab: Tools to Optimize Your Focus | Episode 84"),
-        ("https://www.youtube.com/watch?v=3", "Dwarkesh Patel: Ilya Sutskever on AGI"),
-        ("https://www.youtube.com/watch?v=4", "Acquired: The Complete History of Nvidia"),
-        ("https://www.youtube.com/watch?v=5", "MIT 18.06 Linear Algebra Lecture 1"),
-        ("https://www.youtube.com/watch?v=6", "Craziest Dog Fails Compilation 2024"),
-        ("https://www.youtube.com/shorts/xyz", "Funny Dog Meme Short"),
-        ("https://tv.apple.com/show/ted-lasso", "Watch Ted Lasso Season 3 Episode 1"),
-        ("https://podcasts.apple.com/us/podcast/huberman-lab/id1545953110", "Huberman Lab on Apple Podcasts"),
-        ("https://open.spotify.com/episode/xyz", "The Joe Rogan Experience #2100"),
+        ("developer", "https://github.com/torvalds/linux", "Linux Kernel Git Repo"),
+        ("developer", "https://www.youtube.com/watch?v=1", "Rust for Systems Programming Tutorial"),
+        ("academic", "https://overleaf.com/project/1", "Master Thesis Document"),
+        ("academic", "https://www.youtube.com/watch?v=2", "MIT 18.06 Linear Algebra Lecture 1"),
+        ("founder", "https://linear.app/team/issue/1", "Q3 Strategic Roadmap"),
+        ("founder", "https://www.youtube.com/watch?v=3", "Acquired: Complete History of Nvidia"),
+        ("creator", "https://figma.com/file/1", "Design System UI Kit"),
+        ("general", "https://www.youtube.com/watch?v=4", "Lex Fridman Podcast #400 – Jeff Bezos"),
+        ("zen", "https://www.youtube.com/watch?v=5", "All-In Podcast E150: Economy"),
+        ("general", "https://www.youtube.com/watch?v=6", "Craziest Dog Fails Compilation 2024"),
     ]
 
-    print("--- Testing Jev Hybrid Decision Engine (with Podcast Support) ---")
-    for u, t in test_cases:
-        res = evaluate_tab(u, t)
-        print(f"[{res['action']:8s}] ({res.get('model', 'unknown'):18s}) {t[:38]:38s} -> {res['reason']}")
+    print("--- Testing Profile-Aware Jev Decision Engine ---")
+    for prof, u, t in test_cases:
+        res = evaluate_tab(u, t, profile_id=prof)
+        print(f"[{prof:9s}] [{res['action']:8s}] ({res.get('model', 'unknown'):18s}) {t[:32]:32s} -> {res['reason']}")

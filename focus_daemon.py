@@ -18,6 +18,7 @@ from urllib.parse import urlparse
 
 from decision_engine import evaluate_tab
 from history_reader import analyze_history
+from profiles import get_profile, serialize_profile, list_profiles, PROFILES, DEFAULT_PROFILE_ID
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATS_FILE = os.path.join(BASE_DIR, "focus_stats.json")
@@ -36,18 +37,23 @@ SUPPORTED_BROWSERS = [
 stats_lock = threading.Lock()
 
 def load_stats():
-    if os.path.exists(STATS_FILE):
-        try:
-            with open(STATS_FILE, "r") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return {
+    default_stats = {
         "total_intercepted": 0,
         "site_counts": {},
         "history": [],
-        "exceptions_allowed": []
+        "exceptions_allowed": [],
+        "active_profile": DEFAULT_PROFILE_ID
     }
+    if os.path.exists(STATS_FILE):
+        try:
+            with open(STATS_FILE, "r") as f:
+                d = json.load(f)
+                if "active_profile" not in d:
+                    d["active_profile"] = DEFAULT_PROFILE_ID
+                return d
+        except Exception:
+            pass
+    return default_stats
 
 def save_stats(data):
     try:
@@ -65,7 +71,9 @@ history_lock = threading.Lock()
 def refresh_history_cache():
     global cached_history_data
     try:
-        data = analyze_history(limit=400)
+        with stats_lock:
+            prof_id = stats.get("active_profile", DEFAULT_PROFILE_ID)
+        data = analyze_history(limit=400, profile_id=prof_id)
         with history_lock:
             cached_history_data = data
     except Exception as e:
@@ -188,7 +196,10 @@ def tab_watcher_loop():
                 with history_lock:
                     trajectory = cached_history_data.get("recent_trajectory", [])
 
-                decision = evaluate_tab(url, title, recent_trajectory=trajectory)
+                with stats_lock:
+                    active_prof = stats.get("active_profile", DEFAULT_PROFILE_ID)
+
+                decision = evaluate_tab(url, title, recent_trajectory=trajectory, profile_id=active_prof)
                 action = decision.get("action")
                 domain = decision.get("domain", "")
 
@@ -218,7 +229,11 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             with stats_lock:
-                data = json.dumps(stats).encode("utf-8")
+                act = stats.get("active_profile", DEFAULT_PROFILE_ID)
+                stats_copy = dict(stats)
+                stats_copy["active_profile"] = act
+                stats_copy["profile_details"] = serialize_profile(get_profile(act))
+                data = json.dumps(stats_copy).encode("utf-8")
             self.wfile.write(data)
         elif parsed.path == "/api/history":
             self.send_response(200)
@@ -228,6 +243,43 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             with history_lock:
                 data = json.dumps(cached_history_data).encode("utf-8")
             self.wfile.write(data)
+        elif parsed.path == "/api/profiles":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            with stats_lock:
+                act = stats.get("active_profile", DEFAULT_PROFILE_ID)
+            resp = {
+                "active": act,
+                "active_profile": serialize_profile(get_profile(act)),
+                "profiles": list_profiles()
+            }
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
+        elif parsed.path == "/api/profile":
+            from urllib.parse import parse_qs
+            qs = parse_qs(parsed.query)
+            new_prof = qs.get("set", [None])[0]
+            if new_prof and new_prof in PROFILES:
+                with stats_lock:
+                    stats["active_profile"] = new_prof
+                    save_stats(stats)
+                threading.Thread(target=refresh_history_cache, daemon=True).start()
+                p = get_profile(new_prof)
+                p_name = p.get('name', 'Persona')
+                p_badge = p.get('badge', '')
+                script = f'display notification "Switched focus persona to {p_name}" with title "Focus Persona Active {p_badge}"'
+                subprocess.run(["osascript", "-e", script], capture_output=True)
+                resp = {"status": "ok", "active": new_prof, "profile": serialize_profile(p)}
+            else:
+                with stats_lock:
+                    act = stats.get("active_profile", DEFAULT_PROFILE_ID)
+                resp = {"active": act, "profile": serialize_profile(get_profile(act))}
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
         elif parsed.path == "/api/reset":
             with stats_lock:
                 stats["total_intercepted"] = 0
@@ -252,6 +304,39 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(f"Error: {e}".encode("utf-8"))
+
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        if parsed.path == "/api/profile":
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                body = json.loads(post_data.decode('utf-8'))
+                new_prof = body.get("profile")
+                if new_prof in PROFILES:
+                    with stats_lock:
+                        stats["active_profile"] = new_prof
+                        save_stats(stats)
+                    threading.Thread(target=refresh_history_cache, daemon=True).start()
+                    p = get_profile(new_prof)
+                    p_name = p.get('name', 'Persona')
+                    p_badge = p.get('badge', '')
+                    script = f'display notification "Switched focus persona to {p_name}" with title "Focus Persona Active {p_badge}"'
+                    subprocess.run(["osascript", "-e", script], capture_output=True)
+                    resp = {"status": "ok", "active": new_prof, "profile": serialize_profile(p)}
+                else:
+                    resp = {"error": f"Unknown profile: {new_prof}"}
+            except Exception as e:
+                resp = {"error": str(e)}
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
+        else:
+            self.send_response(404)
+            self.end_headers()
 
     def log_message(self, format, *args):
         return

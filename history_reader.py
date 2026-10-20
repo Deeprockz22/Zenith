@@ -43,18 +43,24 @@ KNOWN_PRODUCTIVE_ROOTS = {
     "stitcher.com", "audible.com", "ted.com", "npr.org"
 }
 
+from profiles import get_profile
+
 def get_active_history_db():
     for name, path in HISTORY_PATHS:
         if os.path.exists(path) and os.path.getsize(path) > 0:
             return name, path
     return None, None
 
-def analyze_history(limit=500):
-    """Parses browser history to extract habits, time sinks, and danger hours."""
+def analyze_history(limit=500, profile_id=None):
+    """Parses browser history to extract habits, time sinks, and danger hours based on active profile."""
+    profile = get_profile(profile_id)
+    profile_productive = KNOWN_PRODUCTIVE_ROOTS | profile.get("productive_domains", set())
+
     browser_name, db_path = get_active_history_db()
     if not db_path:
         return {
             "browser": "None detected",
+            "profile": profile.get("id"),
             "top_distractions": [],
             "top_productive": [],
             "hourly_distraction_distribution": {},
@@ -99,7 +105,7 @@ def analyze_history(limit=500):
 
             # Classify host
             is_distraction = any(host == d or host.endswith("." + d) for d in KNOWN_ENTERTAINMENT_ROOTS)
-            is_productive = any(host == p or host.endswith("." + p) for p in KNOWN_PRODUCTIVE_ROOTS)
+            is_productive = any(host == p or host.endswith("." + p) for p in profile_productive)
 
             if is_distraction:
                 distraction_counts[host] += visit_count

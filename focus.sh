@@ -72,6 +72,49 @@ open_dashboard() {
     open "http://localhost:5050"
 }
 
+profile() {
+    if [ -z "$2" ]; then
+        echo "══════════════════════════════════════════════════════════════════"
+        echo "🧠 REFLEX-MAC FOCUS PERSONAS & PROFILES"
+        echo "══════════════════════════════════════════════════════════════════"
+        python3 -c "
+import urllib.request, json
+try:
+    with urllib.request.urlopen('http://localhost:5050/api/profiles') as res:
+        data = json.loads(res.read().decode())
+        act = data.get('active', '')
+        for p in data.get('profiles', []):
+            mark = '👉 [ACTIVE]' if p['id'] == act else '  '
+            print(f\"{mark:12s} {p['badge']:10s} {p['id']:12s} | {p['name']:22s} -> {p['tagline']}\")
+except Exception:
+    import sys
+    sys.path.append('$DIR')
+    from profiles import list_profiles
+    for p in list_profiles():
+        print(f\"   {p['badge']:10s} {p['id']:12s} | {p['name']:22s} -> {p['tagline']}\")
+"
+        echo "──────────────────────────────────────────────────────────────────"
+        echo "💡 Switch profile with: ./focus.sh profile <id>"
+        echo "   Example: ./focus.sh profile developer"
+        echo "══════════════════════════════════════════════════════════════════"
+    else
+        python3 -c "
+import urllib.request, json
+try:
+    with urllib.request.urlopen('http://localhost:5050/api/profile?set=$2') as res:
+        d = json.loads(res.read().decode())
+        if 'error' in d:
+            print('❌ Error:', d['error'])
+        else:
+            p = d.get('profile', {})
+            print(f'✅ Switched Focus Persona to: {p.get(\"badge\")} {p.get(\"name\")}')
+            print(f'🎯 Tagline: {p.get(\"tagline\")}')
+except Exception as e:
+    print('⚠️ Daemon not running or error:', e)
+"
+    fi
+}
+
 run_fg() {
     export PATH="$DIR/.venv/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
     exec "$PYTHON_BIN" "$DAEMON_SCRIPT"
@@ -90,6 +133,9 @@ case "$1" in
     status)
         status
         ;;
+    profile)
+        profile "$@"
+        ;;
     open)
         open_dashboard
         ;;
@@ -99,7 +145,7 @@ case "$1" in
         start
         ;;
     *)
-        echo "Usage: $0 {start|stop|status|restart|open}"
+        echo "Usage: $0 {start|stop|status|restart|open|profile [id]}"
         exit 1
         ;;
 esac

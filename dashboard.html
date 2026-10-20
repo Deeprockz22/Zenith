@@ -402,6 +402,71 @@
             font-weight: 600;
         }
 
+        /* Profile Persona Switcher */
+        .profile-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .profile-buttons-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 600px) {
+            .profile-buttons-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .profile-btn {
+            background: var(--bg-term);
+            border: 1px solid var(--border-dim);
+            color: var(--text-dim);
+            padding: 0.6rem 0.65rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            align-items: flex-start;
+            transition: all 0.15s ease;
+            text-align: left;
+            user-select: none;
+        }
+
+        .profile-btn:hover {
+            border-color: var(--cyan);
+            color: var(--text-main);
+            background: var(--bg-elevated);
+        }
+
+        .profile-btn.active {
+            border-color: var(--green);
+            background: rgba(34, 197, 94, 0.08);
+            color: var(--text-main);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.15);
+        }
+
+        .profile-btn .p-badge {
+            font-weight: 700;
+            color: var(--cyan);
+            font-size: 0.68rem;
+            letter-spacing: 0.05em;
+        }
+
+        .profile-btn.active .p-badge {
+            color: var(--green);
+        }
+
+        .profile-btn .p-name {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
         /* CLI Interactive Prompt */
         .cli-prompt-bar {
             border: 1px solid var(--border-dim);
@@ -478,6 +543,21 @@
                 [ SYSTEM_ONE // NEURAL_REFLEX_INTERCEPT // LOCAL_SANCTUARY ]
             </div>
         </header>
+
+        <!-- Profile Persona Switcher Bar -->
+        <div class="box" style="margin-bottom: 1.25rem;">
+            <div class="box-header">
+                <div><span class="tag-id">[00]</span> FOCUS_PERSONA // ACTIVE_PROFILE</div>
+                <div style="color: var(--cyan); font-size: 0.72rem; font-weight: 500;" id="active-profile-tagline">
+                    INITIALIZING PERSONA...
+                </div>
+            </div>
+            <div class="box-body" style="padding: 0.75rem 1rem;">
+                <div class="profile-buttons-grid" id="profile-buttons-container">
+                    <!-- Populated dynamically via /api/profiles -->
+                </div>
+            </div>
+        </div>
 
         <!-- ASCII Biofeedback / Breath Bar -->
         <div class="box">
@@ -585,7 +665,7 @@
                 <div style="color: var(--text-muted); font-size: 0.7rem;">HOTKEYS: [ 1 - 6 ]</div>
             </div>
             <div class="box-body">
-                <div class="portals-list">
+                <div class="portals-list" id="portals-container">
                     <a href="https://github.com" target="_blank" class="portal-item" onclick="playClick()">
                         <span class="portal-num">[1] GITHUB</span>
                         <span class="portal-tag">github.com</span>
@@ -791,16 +871,89 @@
             document.getElementById('chrono-toggle-btn').classList.remove('active');
         }
 
-        // --- 5. Hotkeys & CLI Interaction ---
-        const portals = [
-            "https://github.com",
-            "https://notion.so",
-            "https://chatgpt.com",
-            "https://claude.ai",
-            "https://leetcode.com",
-            "https://canvas.chalmers.se"
-        ];
+        // --- 4.5 Profiles & Personas Management ---
+        let currentProfiles = [];
+        let activeProfileId = 'general';
+        let currentPortals = [];
 
+        function renderProfiles(profiles, activeId) {
+            currentProfiles = profiles || [];
+            activeProfileId = activeId;
+            const container = document.getElementById('profile-buttons-container');
+            if (!container) return;
+
+            container.innerHTML = currentProfiles.map(p => {
+                const isActive = p.id === activeId;
+                return `
+                    <button class="profile-btn ${isActive ? 'active' : ''}" onclick="selectProfile('${p.id}')">
+                        <span class="p-badge">${p.badge}</span>
+                        <span class="p-name">${p.name}</span>
+                    </button>
+                `;
+            }).join('');
+
+            const activeP = currentProfiles.find(p => p.id === activeId);
+            if (activeP) {
+                document.getElementById('active-profile-tagline').innerText = activeP.tagline;
+                renderPortals(activeP.portals);
+            }
+        }
+
+        function renderPortals(portalsList) {
+            currentPortals = portalsList || [];
+            const container = document.getElementById('portals-container');
+            if (!container) return;
+
+            container.innerHTML = currentPortals.map((item, idx) => {
+                const num = idx + 1;
+                return `
+                    <a href="${item.url}" target="_blank" class="portal-item" onclick="playClick()">
+                        <span class="portal-num">[${num}] ${item.name}</span>
+                        <span class="portal-tag">${item.tag}</span>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        async function selectProfile(id) {
+            playClick();
+            try {
+                const res = await fetch(`/api/profile?set=${encodeURIComponent(id)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    activeProfileId = data.active;
+                    if (data.profile) {
+                        document.getElementById('active-profile-tagline').innerText = data.profile.tagline;
+                        renderPortals(data.profile.portals);
+                    }
+                    document.querySelectorAll('.profile-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    const btns = document.querySelectorAll('.profile-btn');
+                    currentProfiles.forEach((p, i) => {
+                        if (p.id === id && btns[i]) btns[i].classList.add('active');
+                    });
+                    fetchTelemetry();
+                    playTibetanBowl(432, 1.5, 0.15);
+                }
+            } catch (e) {
+                console.error("Profile selection error", e);
+            }
+        }
+
+        async function fetchProfiles() {
+            try {
+                const res = await fetch('/api/profiles');
+                if (res.ok) {
+                    const data = await res.json();
+                    renderProfiles(data.profiles, data.active);
+                }
+            } catch (e) {
+                console.error("Profiles fetch error", e);
+            }
+        }
+
+        // --- 5. Hotkeys & CLI Interaction ---
         window.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT') return;
 
@@ -813,9 +966,11 @@
                 toggleAudio();
             } else if (e.key >= '1' && e.key <= '6') {
                 const idx = parseInt(e.key) - 1;
-                playClick();
-                document.getElementById('cli-feedback').innerText = `open portal [${e.key}] -> ${portals[idx]}`;
-                setTimeout(() => window.open(portals[idx], '_blank'), 150);
+                if (currentPortals && currentPortals[idx]) {
+                    playClick();
+                    document.getElementById('cli-feedback').innerText = `open portal [${e.key}] -> ${currentPortals[idx].url}`;
+                    setTimeout(() => window.open(currentPortals[idx].url, '_blank'), 150);
+                }
             }
         });
 
@@ -841,14 +996,20 @@
                     document.getElementById('stat-time').innerText = `${total * 15}m`;
                     document.getElementById('stat-allowed').innerText = allowedList.length;
 
+                    if (stats.active_profile && stats.active_profile !== activeProfileId) {
+                        activeProfileId = stats.active_profile;
+                        fetchProfiles();
+                    }
+
+                    const profileBadge = stats.profile_details?.badge || '[FOCUS]';
                     if (allowedList.length > 0) {
                         const last = allowedList[allowedList.length - 1];
-                        const titlePreview = (last.title || '').slice(0, 30);
+                        const titlePreview = (last.title || '').slice(0, 28);
                         document.getElementById('cli-feedback').innerText =
-                            `status --guard=active --podcasts=permitted [last allowed: ${titlePreview}]`;
+                            `status ${profileBadge} --guard=active --allowed=[${titlePreview}]`;
                     } else {
                         document.getElementById('cli-feedback').innerText =
-                            'status --guard=active --podcasts=permitted --mode=calm';
+                            `status ${profileBadge} --guard=active --mode=calm`;
                     }
                 }
 
@@ -893,6 +1054,7 @@
         }
 
         updateChronoDisplay();
+        fetchProfiles();
         fetchTelemetry();
         setInterval(fetchTelemetry, 3000);
     </script>
