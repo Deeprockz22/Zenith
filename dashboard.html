@@ -3,27 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REFLEX // TERMINAL SANCTUARY</title>
+    <title>Reflex — Focus Sanctuary</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-term: #08090c;
-            --bg-panel: #0d0f14;
-            --bg-elevated: #131720;
-            --border-dim: #1e2532;
-            --border-bright: #334155;
-            --border-green: rgba(16, 185, 129, 0.4);
-            --text-main: #e2e8f0;
-            --text-dim: #64748b;
-            --text-muted: #475569;
-            --green: #10b981;
-            --green-glow: rgba(16, 185, 129, 0.25);
-            --cyan: #38bdf8;
-            --amber: #f59e0b;
-            --rose: #f43f5e;
-            --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+            /* Apple Color System (macOS Sequoia / iOS 18 palette) */
+            --bg-base: #000000;
+            --bg-surface: rgba(28, 28, 36, 0.65);
+            --bg-surface-elevated: rgba(38, 38, 48, 0.75);
+            --bg-surface-subtle: rgba(255, 255, 255, 0.05);
+            --bg-pill: rgba(255, 255, 255, 0.08);
+            --bg-pill-hover: rgba(255, 255, 255, 0.14);
+            --bg-pill-active: rgba(255, 255, 255, 0.22);
+
+            --border-glass: rgba(255, 255, 255, 0.10);
+            --border-glass-bright: rgba(255, 255, 255, 0.18);
+            --specular-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.22);
+            --shadow-card: 0 24px 60px -15px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.07);
+
+            --apple-blue: #0a84ff;
+            --apple-cyan: #64d2ff;
+            --apple-green: #30d158;
+            --apple-indigo: #5e5ce6;
+            --apple-purple: #bf5af2;
+            --apple-pink: #ff375f;
+            --apple-orange: #ff9f0a;
+            --apple-yellow: #ffd60a;
+
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.72);
+            --text-tertiary: rgba(255, 255, 255, 0.45);
+            --text-quaternary: rgba(255, 255, 255, 0.28);
+
+            --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", -system-ui, sans-serif;
+            --font-mono: "SF Mono", Menlo, Consolas, "JetBrains Mono", monospace;
+            --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * {
@@ -31,35 +47,83 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         body {
-            background-color: var(--bg-term);
-            color: var(--text-main);
-            font-family: var(--font-mono);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-display);
             min-height: 100vh;
-            padding: 2rem 1.25rem;
+            padding: 2.5rem 1.5rem 4rem;
             display: flex;
             justify-content: center;
             position: relative;
-            line-height: 1.5;
+            overflow-x: hidden;
+            line-height: 1.45;
+            selection-background-color: var(--apple-blue);
         }
 
-        /* Subtle CRT scanline overlay */
-        body::before {
-            content: " ";
-            display: block;
+        /* Ambient Apple Wallpaper Glow */
+        .ambient-mesh {
             position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-            z-index: 99;
-            background-size: 100% 3px, 6px 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             pointer-events: none;
-            opacity: 0.6;
+            z-index: 0;
+            overflow: hidden;
         }
 
-        .terminal-wrapper {
-            max-width: 980px;
+        .ambient-blob-1 {
+            position: absolute;
+            top: -15%;
+            left: 15%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(94, 92, 230, 0.22) 0%, rgba(10, 132, 255, 0.12) 40%, transparent 70%);
+            filter: blur(90px);
+            animation: float-ambient 18s ease-in-out infinite alternate;
+        }
+
+        .ambient-blob-2 {
+            position: absolute;
+            top: 40%;
+            right: -10%;
+            width: 650px;
+            height: 650px;
+            background: radial-gradient(circle, rgba(100, 210, 255, 0.18) 0%, rgba(48, 209, 88, 0.08) 45%, transparent 70%);
+            filter: blur(100px);
+            animation: float-ambient-alt 22s ease-in-out infinite alternate;
+        }
+
+        .ambient-blob-3 {
+            position: absolute;
+            bottom: -15%;
+            left: 20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(191, 90, 242, 0.14) 0%, rgba(255, 55, 95, 0.06) 50%, transparent 70%);
+            filter: blur(110px);
+            animation: float-ambient 24s ease-in-out infinite alternate;
+        }
+
+        @keyframes float-ambient {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(40px, -30px) scale(1.08); }
+            100% { transform: translate(-30px, 35px) scale(0.96); }
+        }
+
+        @keyframes float-ambient-alt {
+            0% { transform: translate(0, 0) scale(0.98); }
+            50% { transform: translate(-50px, 40px) scale(1.05); }
+            100% { transform: translate(30px, -20px) scale(1); }
+        }
+
+        /* Main Container */
+        .sanctuary-shell {
+            max-width: 1040px;
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -68,733 +132,1039 @@
             z-index: 1;
         }
 
-        /* Top System Status Bar */
-        .sys-bar {
-            border: 1px solid var(--border-dim);
-            background: var(--bg-panel);
-            padding: 0.6rem 1rem;
-            border-radius: 6px;
+        /* macOS Floating Header Capsule */
+        .mac-nav-bar {
+            background: rgba(24, 24, 30, 0.70);
+            backdrop-filter: blur(40px) saturate(200%);
+            -webkit-backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid var(--border-glass);
+            box-shadow: var(--specular-top), 0 10px 30px rgba(0, 0, 0, 0.4);
+            border-radius: 9999px;
+            padding: 0.6rem 1.25rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.75rem;
-            flex-wrap: wrap;
-            gap: 0.75rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
         }
 
-        .sys-group {
+        .nav-left, .nav-right {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.85rem;
         }
 
-        .status-badge {
-            color: var(--green);
+        .apple-monogram {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+        }
+
+        .apple-monogram svg {
+            width: 15px;
+            height: 18px;
+            fill: currentColor;
+            opacity: 0.95;
+        }
+
+        .pill-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            font-weight: 600;
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--green);
-            box-shadow: 0 0 8px var(--green);
-            animation: pulse-dot 2.5s infinite;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.85); }
-        }
-
-        .term-btn {
-            background: transparent;
-            border: 1px solid var(--border-dim);
-            color: var(--text-dim);
-            font-family: var(--font-mono);
+            background: rgba(48, 209, 88, 0.14);
+            color: var(--apple-green);
+            padding: 0.2rem 0.65rem;
+            border-radius: 9999px;
             font-size: 0.72rem;
-            padding: 0.3rem 0.7rem;
-            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid rgba(48, 209, 88, 0.25);
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--apple-green);
+            box-shadow: 0 0 8px var(--apple-green);
+            animation: pulse-ring 2.5s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.45; transform: scale(0.85); }
+        }
+
+        .nav-meta-item {
+            color: var(--text-tertiary);
+            font-size: 0.75rem;
+        }
+
+        .mac-btn {
+            background: var(--bg-pill);
+            border: 1px solid var(--border-glass);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.2s var(--ease-apple);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            box-shadow: var(--specular-top);
         }
 
-        .term-btn:hover {
-            color: var(--text-main);
-            border-color: var(--border-bright);
-            background: var(--bg-elevated);
+        .mac-btn:hover {
+            background: var(--bg-pill-hover);
+            color: var(--text-primary);
+            border-color: var(--border-glass-bright);
+            transform: translateY(-0.5px);
         }
 
-        .term-btn.active {
-            color: var(--green);
-            border-color: var(--border-green);
+        .mac-btn:active {
+            transform: scale(0.97);
+            background: var(--bg-pill-active);
         }
 
-        /* ASCII Header */
-        .ascii-hero {
+        .mac-btn.active {
+            background: rgba(10, 132, 255, 0.2);
+            color: var(--apple-blue);
+            border-color: rgba(10, 132, 255, 0.35);
+        }
+
+        /* Hero Title Header */
+        .hero-banner {
+            text-align: center;
             padding: 1rem 0 0.5rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center;
-            gap: 0.5rem;
+            gap: 0.35rem;
         }
 
-        .ascii-art {
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            line-height: 1.15;
-            color: var(--green);
-            text-shadow: 0 0 10px var(--green-glow);
-            white-space: pre;
-            user-select: none;
-            overflow-x: auto;
-            max-width: 100%;
-        }
-
-        @media (max-width: 600px) {
-            .ascii-art { font-size: 0.5rem; }
-        }
-
-        .ascii-subtitle {
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            letter-spacing: 0.1em;
+        .hero-eyebrow {
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
+            background: linear-gradient(135deg, var(--apple-cyan), var(--apple-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* ASCII Box Containers */
-        .box {
-            border: 1px solid var(--border-dim);
-            background: var(--bg-panel);
-            border-radius: 6px;
+        .hero-title {
+            font-size: 2.75rem;
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            max-width: 580px;
+        }
+
+        /* Card Surface (Liquid Retina / visionOS style) */
+        .glass-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(50px) saturate(190%);
+            -webkit-backdrop-filter: blur(50px) saturate(190%);
+            border: 1px solid var(--border-glass);
+            border-radius: 26px;
+            box-shadow: var(--shadow-card), var(--specular-top);
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
             overflow: hidden;
         }
 
-        .box-header {
-            background: var(--bg-elevated);
-            border-bottom: 1px solid var(--border-dim);
-            padding: 0.5rem 1rem;
-            font-size: 0.75rem;
+        .card-header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: var(--text-main);
-            font-weight: 500;
+            padding-bottom: 0.25rem;
         }
 
-        .box-header .tag-id {
-            color: var(--cyan);
-            margin-right: 0.4rem;
-        }
-
-        .box-body {
-            padding: 1.25rem;
+        .card-title-group {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.15rem;
         }
 
-        /* Dual Grid */
-        .grid-2col {
+        .card-eyebrow {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            color: var(--text-primary);
+        }
+
+        /* Persona Switcher (Segmented Control Pill Bar) */
+        .segmented-bar {
+            background: rgba(0, 0, 0, 0.45);
+            padding: 4px;
+            border-radius: 9999px;
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            scrollbar-width: none;
+        }
+        .segmented-bar::-webkit-scrollbar { display: none; }
+
+        .segment-btn {
+            flex: 1;
+            min-width: 110px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            padding: 0.6rem 1rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.25s var(--ease-apple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .segment-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .segment-btn.active {
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .persona-tagline-text {
+            font-size: 0.825rem;
+            color: var(--apple-cyan);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        /* Apple Watch Breathe Experience (Organic Petal Lotus) */
+        .breathe-module {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 0 1rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .lotus-container {
+            width: 170px;
+            height: 170px;
+            position: relative;
+            margin: 0.5rem 0 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lotus-core {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(100, 210, 255, 0.85) 0%, rgba(48, 209, 88, 0.5) 70%, transparent 100%);
+            filter: blur(8px);
+            z-index: 2;
+        }
+
+        .petal {
+            position: absolute;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(100, 210, 255, 0.55), rgba(48, 209, 88, 0.35) 60%, rgba(94, 92, 230, 0.2) 100%);
+            mix-blend-mode: screen;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(100, 210, 255, 0.35);
+            transition: transform 3.8s var(--ease-apple), opacity 3.8s ease;
+        }
+
+        /* 6 Petals positioned in radial circle */
+        .petal-1 { transform: rotate(0deg) translate(28px); }
+        .petal-2 { transform: rotate(60deg) translate(28px); }
+        .petal-3 { transform: rotate(120deg) translate(28px); }
+        .petal-4 { transform: rotate(180deg) translate(28px); }
+        .petal-5 { transform: rotate(240deg) translate(28px); }
+        .petal-6 { transform: rotate(300deg) translate(28px); }
+
+        /* Animation class states */
+        .lotus-container.inhale .petal-1 { transform: rotate(25deg) translate(46px) scale(1.28); }
+        .lotus-container.inhale .petal-2 { transform: rotate(85deg) translate(46px) scale(1.28); }
+        .lotus-container.inhale .petal-3 { transform: rotate(145deg) translate(46px) scale(1.28); }
+        .lotus-container.inhale .petal-4 { transform: rotate(205deg) translate(46px) scale(1.28); }
+        .lotus-container.inhale .petal-5 { transform: rotate(265deg) translate(46px) scale(1.28); }
+        .lotus-container.inhale .petal-6 { transform: rotate(325deg) translate(46px) scale(1.28); }
+
+        .lotus-container.exhale .petal-1 { transform: rotate(0deg) translate(18px) scale(0.78); }
+        .lotus-container.exhale .petal-2 { transform: rotate(60deg) translate(18px) scale(0.78); }
+        .lotus-container.exhale .petal-3 { transform: rotate(120deg) translate(18px) scale(0.78); }
+        .lotus-container.exhale .petal-4 { transform: rotate(180deg) translate(18px) scale(0.78); }
+        .lotus-container.exhale .petal-5 { transform: rotate(240deg) translate(18px) scale(0.78); }
+        .lotus-container.exhale .petal-6 { transform: rotate(300deg) translate(18px) scale(0.78); }
+
+        .breathe-phase-label {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+            transition: opacity 0.5s ease;
+        }
+
+        .breathe-instruction {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Telemetry Bento Grid */
+        .telemetry-row {
             display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.15rem;
+        }
+
+        @media (max-width: 900px) {
+            .telemetry-row { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 580px) {
+            .telemetry-row { grid-template-columns: 1fr; }
+        }
+
+        .stat-bento-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.25rem 1.15rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            box-shadow: var(--specular-top);
+            transition: transform 0.2s var(--ease-apple), background 0.2s ease;
+        }
+
+        .stat-bento-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-icon-label {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .stat-val-huge {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.15;
+            color: #ffffff;
+        }
+
+        .stat-foot-note {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+
+        /* Mindful Entertainment Quota (Apple TV / Screen Time Style) */
+        .quota-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 1.25rem;
         }
 
-        @media (max-width: 768px) {
-            .grid-2col {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 720px) {
+            .quota-grid { grid-template-columns: 1fr; }
         }
 
-        /* Biofeedback / Breathing ASCII Bar */
-        .breath-console {
+        .quota-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.35rem;
             display: flex;
             flex-direction: column;
+            gap: 0.85rem;
+            box-shadow: var(--specular-top);
+        }
+
+        .quota-header-split {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.75rem;
-            text-align: center;
-            padding: 0.5rem 0;
         }
 
-        .breath-ascii-bar {
-            font-size: 0.9rem;
-            color: var(--green);
-            letter-spacing: 0.08em;
-            user-select: none;
-        }
-
-        .breath-caption {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-        }
-
-        .breath-state-text {
-            color: var(--text-main);
-            font-weight: 600;
-            animation: pulse-txt 4s infinite ease-in-out;
-        }
-
-        @keyframes pulse-txt {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-
-        /* Telemetry Numbers Strip */
-        .telemetry-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.75rem;
-        }
-
-        @media (max-width: 900px) {
-            .telemetry-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 600px) {
-            .telemetry-grid { grid-template-columns: 1fr; }
-        }
-
-        .telem-cell {
-            border: 1px solid var(--border-dim);
-            background: var(--bg-term);
-            padding: 0.9rem 1rem;
-            border-radius: 4px;
+        .quota-badge-title {
             display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
-        }
-
-        .telem-key {
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .telem-val {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-main);
-            line-height: 1.2;
-        }
-
-        .telem-sub {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-
-        /* Swiss-Style Chronometer */
-        .chrono-display {
-            font-size: 3.5rem;
-            font-weight: 600;
-            text-align: center;
-            color: var(--text-main);
-            letter-spacing: -0.02em;
-            padding: 0.5rem 0;
-        }
-
-        .chrono-actions {
-            display: flex;
-            justify-content: center;
-            gap: 0.6rem;
-        }
-
-        .key-btn {
-            background: var(--bg-term);
-            border: 1px solid var(--border-bright);
-            color: var(--text-main);
-            font-family: var(--font-mono);
-            font-size: 0.78rem;
-            padding: 0.5rem 1.1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-        }
-
-        .key-btn:hover {
-            border-color: var(--green);
-            color: var(--green);
-            background: var(--bg-elevated);
-        }
-
-        .key-btn.active {
-            border-color: var(--amber);
-            color: var(--amber);
-        }
-
-        .shortcut-badge {
-            font-size: 0.65rem;
-            background: var(--border-dim);
-            padding: 0.1rem 0.35rem;
-            border-radius: 3px;
-            color: var(--text-dim);
-        }
-
-        /* Distraction ASCII Matrix Table */
-        .ascii-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.8rem;
-        }
-
-        .ascii-table th {
-            text-align: left;
-            padding: 0.4rem 0.5rem;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border-dim);
-            font-weight: 500;
-            font-size: 0.72rem;
-            text-transform: uppercase;
-        }
-
-        .ascii-table td {
-            padding: 0.5rem 0.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            font-family: var(--font-mono);
-        }
-
-        .ascii-bar-fill {
-            color: var(--rose);
-            font-size: 0.75rem;
-        }
-
-        /* Portals Matrix */
-        .portals-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
-            gap: 0.6rem;
-        }
-
-        .portal-item {
-            border: 1px solid var(--border-dim);
-            background: var(--bg-term);
-            padding: 0.75rem 0.85rem;
-            border-radius: 4px;
-            text-decoration: none;
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
-            transition: all 0.15s ease;
-        }
-
-        .portal-item:hover {
-            border-color: var(--cyan);
-            transform: translateY(-1px);
-            background: var(--bg-elevated);
-        }
-
-        .portal-num {
-            font-size: 0.68rem;
-            color: var(--cyan);
-        }
-
-        .portal-tag {
-            font-size: 0.82rem;
-            font-weight: 600;
-        }
-
-        /* Profile Persona Switcher */
-        .profile-buttons-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
             gap: 0.5rem;
+            font-size: 0.825rem;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
-        @media (max-width: 900px) {
-            .profile-buttons-grid { grid-template-columns: repeat(3, 1fr); }
+        .quota-badge-title svg {
+            width: 17px;
+            height: 17px;
+            fill: var(--apple-cyan);
         }
 
-        @media (max-width: 600px) {
-            .profile-buttons-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        .profile-btn {
-            background: var(--bg-term);
-            border: 1px solid var(--border-dim);
-            color: var(--text-dim);
-            padding: 0.6rem 0.65rem;
-            border-radius: 4px;
-            font-family: var(--font-mono);
+        .quota-pill-status {
             font-size: 0.72rem;
-            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            background: rgba(48, 209, 88, 0.15);
+            color: var(--apple-green);
+            border: 1px solid rgba(48, 209, 88, 0.25);
+        }
+
+        .quota-pill-status.limit {
+            background: rgba(255, 55, 95, 0.15);
+            color: var(--apple-pink);
+            border-color: rgba(255, 55, 95, 0.25);
+        }
+
+        .quota-meter-capsules {
             display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
-            align-items: flex-start;
-            transition: all 0.15s ease;
-            text-align: left;
-            user-select: none;
+            gap: 0.5rem;
+            align-items: center;
         }
 
-        .profile-btn:hover {
-            border-color: var(--cyan);
-            color: var(--text-main);
-            background: var(--bg-elevated);
+        .capsule-segment {
+            flex: 1;
+            height: 10px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s var(--ease-apple);
         }
 
-        .profile-btn.active {
-            border-color: var(--green);
-            background: rgba(34, 197, 94, 0.08);
-            color: var(--text-main);
-            box-shadow: 0 0 10px rgba(34, 197, 94, 0.15);
+        .capsule-segment.filled-series {
+            background: linear-gradient(90deg, var(--apple-blue), var(--apple-cyan));
+            box-shadow: 0 0 12px rgba(100, 210, 255, 0.5);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .profile-btn .p-badge {
+        .capsule-segment.filled-movie {
+            background: linear-gradient(90deg, var(--apple-orange), var(--apple-yellow));
+            box-shadow: 0 0 12px rgba(255, 159, 10, 0.5);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .quota-stats-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .quota-numbers {
+            font-size: 1.35rem;
             font-weight: 700;
-            color: var(--cyan);
-            font-size: 0.68rem;
-            letter-spacing: 0.05em;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+            font-variant-numeric: tabular-nums;
         }
 
-        .profile-btn.active .p-badge {
-            color: var(--green);
-        }
-
-        .profile-btn .p-name {
-            font-weight: 500;
+        .quota-desc-small {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            width: 100%;
+            max-width: 220px;
         }
 
-        /* CLI Interactive Prompt */
-        .cli-prompt-bar {
-            border: 1px solid var(--border-dim);
-            background: var(--bg-panel);
-            padding: 0.7rem 1rem;
-            border-radius: 6px;
+        /* 2-Column Split: Distraction Matrix & Focus Timer */
+        .split-grid-2col {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 820px) {
+            .split-grid-2col { grid-template-columns: 1fr; }
+        }
+
+        /* Apple Screen Time Style Distraction List */
+        .screen-time-table {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .screen-time-row {
+            display: grid;
+            grid-template-columns: 130px 1fr 48px;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8125rem;
+        }
+
+        .st-domain-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .st-track-outer {
+            height: 7px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .st-track-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, var(--apple-blue), var(--apple-indigo));
+            transition: width 0.6s var(--ease-apple);
+        }
+
+        .st-count-label {
+            text-align: right;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-secondary);
+        }
+
+        /* Apple Clock Style Focus Stopwatch / Timer */
+        .timer-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 0;
+            gap: 1.25rem;
+        }
+
+        .timer-digits {
+            font-size: 4.25rem;
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            font-variant-numeric: tabular-nums;
+            color: #ffffff;
+            font-feature-settings: "tnum" 1;
+            line-height: 1;
+            text-shadow: 0 0 35px rgba(255, 255, 255, 0.12);
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .timer-primary-btn {
+            background: var(--apple-green);
+            color: #000000;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.65rem 1.45rem;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s var(--ease-apple);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 18px rgba(48, 209, 88, 0.35);
+        }
+
+        .timer-primary-btn:hover {
+            transform: scale(1.02);
+            filter: brightness(1.06);
+        }
+
+        .timer-primary-btn:active {
+            transform: scale(0.97);
+        }
+
+        .timer-primary-btn.running {
+            background: var(--apple-orange);
+            color: #000000;
+            box-shadow: 0 4px 18px rgba(255, 159, 10, 0.35);
+        }
+
+        .timer-secondary-btn {
+            background: rgba(255, 255, 255, 0.10);
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.65rem 1.25rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border-glass);
+            cursor: pointer;
+            transition: all 0.2s var(--ease-apple);
+            box-shadow: var(--specular-top);
+        }
+
+        .timer-secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .shortcut-pill {
+            font-size: 0.65rem;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            opacity: 0.8;
+            font-family: var(--font-mono);
+        }
+
+        /* macOS Launchpad / Dock Style Workspaces Grid */
+        .dock-portals-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.85rem;
+        }
+
+        @media (max-width: 850px) {
+            .dock-portals-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 500px) {
+            .dock-portals-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .portal-app-tile {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.15rem 0.85rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.25s var(--ease-apple);
+            box-shadow: var(--specular-top);
+            position: relative;
+        }
+
+        .portal-app-tile:hover {
+            transform: translateY(-4px) scale(1.02);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 16px 30px -10px rgba(0, 0, 0, 0.5), var(--specular-top);
+        }
+
+        .portal-icon-squircle {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 0.6rem;
-            font-size: 0.82rem;
-            color: var(--text-main);
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
         }
 
-        .cli-user {
-            color: var(--green);
+        .portal-app-name {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
         }
 
-        .cli-cursor {
-            display: inline-block;
-            width: 8px;
-            height: 15px;
-            background: var(--green);
-            animation: blink-cur 1s infinite;
+        .portal-key-shortcut {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            font-family: var(--font-mono);
         }
 
-        @keyframes blink-cur {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
+        /* Interactive Status Pill Footer */
+        .system-pill-footer {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 9999px;
+            padding: 0.65rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+
+        .system-pill-footer b {
+            color: var(--text-secondary);
         }
 
         footer {
             text-align: center;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            padding: 1.5rem 0 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-quaternary);
+            padding: 1rem 0 0.5rem;
         }
     </style>
 </head>
 <body>
-    <div class="terminal-wrapper">
-        <!-- Top Status Telemetry Bar -->
-        <div class="sys-bar">
-            <div class="sys-group">
-                <span class="status-badge"><span class="status-dot"></span> REFLEX_DAEMON // ACTIVE</span>
-                <span style="color: var(--text-muted);">|</span>
-                <span style="color: var(--text-dim);" id="time-display">--:--:--</span>
-                <span style="color: var(--text-muted);">|</span>
-                <span style="color: var(--cyan);">MPS: 47.5ms</span>
-                <span style="color: var(--text-muted);">|</span>
-                <span style="color: var(--text-dim);" id="browser-indicator">ARC</span>
+    <!-- Apple Dynamic Atmospheric Mesh -->
+    <div class="ambient-mesh">
+        <div class="ambient-blob-1"></div>
+        <div class="ambient-blob-2"></div>
+        <div class="ambient-blob-3"></div>
+    </div>
+
+    <div class="sanctuary-shell">
+        <!-- macOS Floating Menu Bar Capsule -->
+        <nav class="mac-nav-bar">
+            <div class="nav-left">
+                <span class="apple-monogram">
+                    <!-- Apple SF logo icon -->
+                    <svg viewBox="0 0 170 170">
+                        <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.69-7.79-11.97-14.24-6.3-9.44-11.22-20.08-14.75-31.93-3.54-11.85-5.31-23.2-5.31-34.05 0-14.88 3.59-27.17 10.77-36.87 7.18-9.7 16.48-14.67 27.9-14.92 4.9.12 10.3 1.34 16.2 3.65 5.9 2.31 9.77 3.53 11.62 3.65 2.12-.25 6.13-1.57 12.03-3.95 5.9-2.38 11.06-3.48 15.48-3.3 13.06.63 23.36 5.48 30.91 14.54-11.39 6.89-17 16.44-16.82 28.65.18 9.53 3.86 17.5 11.05 23.91 7.19 6.41 15.7 10.02 25.53 10.84-2.13 6.4-4.87 13.04-8.23 19.93zM119.22 31.84c0-7.39 2.65-14.28 7.95-20.67 5.3-6.39 11.85-10.45 19.65-12.17.25 1.13.38 2.26.38 3.39 0 7.27-2.77 14.16-8.31 20.67-5.54 6.51-12.23 10.46-20.07 11.85-.25-1.01-.38-2.04-.38-3.07z"/>
+                    </svg>
+                    Reflex Sanctuary
+                </span>
+                <span class="pill-badge">
+                    <span class="pulse-dot"></span> Active Guard
+                </span>
+                <span class="nav-meta-item" id="time-display">--:--:--</span>
             </div>
 
-            <div class="sys-group">
-                <button class="term-btn active" id="audio-toggle-btn" onclick="toggleAudio()">
-                    SFX: [ 432Hz + CLICK ]
+            <div class="nav-right">
+                <span class="nav-meta-item" style="color: var(--apple-cyan); font-weight: 500;">
+                    47ms Jev Neural Core
+                </span>
+                <span class="nav-meta-item" style="color: var(--text-tertiary);" id="browser-indicator">
+                    ARC
+                </span>
+                <button class="mac-btn active" id="audio-toggle-btn" onclick="toggleAudio()">
+                    <span>🔊</span>
+                    <span>Sound: 432Hz</span>
                 </button>
-                <button class="term-btn" onclick="resetStats()">
-                    RESET_LOGS
+                <button class="mac-btn" onclick="resetStats()">
+                    <span>Reset Logs</span>
                 </button>
             </div>
-        </div>
+        </nav>
 
-        <!-- ASCII Header -->
-        <header class="ascii-hero">
-<pre class="ascii-art">
- ██████╗ ███████╗███████╗██╗     ███████╗██╗  ██╗
- ██╔══██╗██╔════╝██╔════╝██║     ██╔════╝╚██╗██╔╝
- ██████╔╝█████╗  █████╗  ██║     █████╗   ╚███╔╝ 
- ██╔══██╗██╔══╝  ██╔══╝  ██║     ██╔══╝   ██╔██╗ 
- ██║  ██║███████╗██║     ███████╗███████╗██╔╝ ██╗
- ╚═╝  ╚═╝╚══════╝╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝
-</pre>
-            <div class="ascii-subtitle">
-                [ SYSTEM_ONE // NEURAL_REFLEX_INTERCEPT // LOCAL_SANCTUARY ]
-            </div>
+        <!-- Hero Header -->
+        <header class="hero-banner">
+            <div class="hero-eyebrow">Cupertino Focus Intelligence</div>
+            <h1 class="hero-title">Mindful Focus Sanctuary</h1>
+            <p class="hero-subtitle">Context-aware neural protection preserving your cognitive energy.</p>
         </header>
 
-        <!-- Profile Persona Switcher Bar -->
-        <div class="box" style="margin-bottom: 1.25rem;">
-            <div class="box-header">
-                <div><span class="tag-id">[00]</span> FOCUS_PERSONA // ACTIVE_PROFILE</div>
-                <div style="color: var(--cyan); font-size: 0.72rem; font-weight: 500;" id="active-profile-tagline">
+        <!-- Focus Persona Switcher (Segmented Control) -->
+        <section class="glass-card">
+            <div class="card-header-row">
+                <div class="card-title-group">
+                    <span class="card-eyebrow">Operating Mode</span>
+                    <h2 class="card-title">Focus Persona</h2>
+                </div>
+                <div class="persona-tagline-text" id="active-profile-tagline">
                     INITIALIZING PERSONA...
                 </div>
             </div>
-            <div class="box-body" style="padding: 0.75rem 1rem;">
-                <div class="profile-buttons-grid" id="profile-buttons-container">
-                    <!-- Populated dynamically via /api/profiles -->
+            <div class="segmented-bar" id="profile-buttons-container">
+                <!-- Dynamically populated via /api/profiles -->
+            </div>
+        </section>
+
+        <!-- Apple Watch Mindfulness Breathe Experience -->
+        <section class="glass-card">
+            <div class="card-header-row">
+                <div class="card-title-group">
+                    <span class="card-eyebrow">Biofeedback Reset</span>
+                    <h2 class="card-title">Mindful Pause</h2>
                 </div>
+                <span class="pill-badge" style="background: rgba(100, 210, 255, 0.12); color: var(--apple-cyan); border-color: rgba(100, 210, 255, 0.25);">
+                    8.0s Rhythm
+                </span>
             </div>
-        </div>
-
-        <!-- ASCII Biofeedback / Breath Bar -->
-        <div class="box">
-            <div class="box-header">
-                <div><span class="tag-id">[01]</span> BIO_FEEDBACK // CALM_PAUSE</div>
-                <div style="color: var(--text-dim); font-size: 0.7rem;">CYCLE: 8.0s</div>
-            </div>
-            <div class="box-body">
-                <div class="breath-console">
-                    <div class="breath-caption">
-                        NEURAL OVERRIDE: <span class="breath-state-text" id="breath-state">INHALE GENTLY</span>
-                    </div>
-                    <div class="breath-ascii-bar" id="breath-ascii">
-                        [ ░░░░░░░░░░████████████████████░░░░░░░░░░ ]
-                    </div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted);">
-                        Take a mindful pause before instinctively switching tasks.
-                    </div>
+            <div class="breathe-module">
+                <div class="lotus-container" id="lotus-flower">
+                    <div class="lotus-core"></div>
+                    <div class="petal petal-1"></div>
+                    <div class="petal petal-2"></div>
+                    <div class="petal petal-3"></div>
+                    <div class="petal petal-4"></div>
+                    <div class="petal petal-5"></div>
+                    <div class="petal petal-6"></div>
                 </div>
+                <div class="breathe-phase-label" id="breath-state">Inhale Gently</div>
+                <div class="breathe-instruction">Take a calming breath before instinctively switching context.</div>
             </div>
-        </div>
+        </section>
 
-        <!-- Telemetry Numbers Strip -->
-        <div class="telemetry-grid">
-            <div class="telem-cell">
-                <span class="telem-key">[ TELEM.01 ] REDIRECTS_TODAY</span>
-                <span class="telem-val" id="stat-total" style="color: var(--green);">0</span>
-                <span class="telem-sub">Distraction impulses paused</span>
-            </div>
-            <div class="telem-cell">
-                <span class="telem-key">[ TELEM.02 ] BANDWIDTH_SAVED</span>
-                <span class="telem-val" id="stat-time" style="color: var(--cyan);">0m</span>
-                <span class="telem-sub">Estimated mental focus preserved</span>
-            </div>
-            <div class="telem-cell">
-                <span class="telem-key">[ TELEM.03 ] PODCASTS_PERMITTED</span>
-                <span class="telem-val" id="stat-allowed" style="color: var(--green);">0</span>
-                <span class="telem-sub">Allowed audio talks & lectures</span>
-            </div>
-            <div class="telem-cell">
-                <span class="telem-key">[ TELEM.04 ] PEAK_VULNERABILITY</span>
-                <span class="telem-val" id="stat-peak" style="font-size: 1.4rem; color: var(--amber);">--:--</span>
-                <span class="telem-sub">Discovered from browser history</span>
-            </div>
-        </div>
-
-        <!-- Mindful Entertainment Quota Box -->
-        <div class="box">
-            <div class="box-header">
-                <div><span class="tag-id">[01B]</span> MINDFUL_ENTERTAINMENT // DAILY_QUOTA</div>
+        <!-- Mindful Entertainment Quota (Apple TV / Screen Time Widget) -->
+        <section class="glass-card">
+            <div class="card-header-row">
+                <div class="card-title-group">
+                    <span class="card-eyebrow">Daily Entertainment Allowance</span>
+                    <h2 class="card-title">Mindful Media Quota</h2>
+                </div>
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="color: var(--amber); font-size: 0.72rem; font-weight: 500;" id="quota-status-label">
-                        SERIES: 0/2 EPS | MOVIES: 0/1 FILM
+                    <span style="font-size: 0.78rem; color: var(--apple-yellow); font-weight: 500;" id="quota-status-label">
+                        Series: 0/2 Eps • Movies: 0/1 Film
                     </span>
-                    <button class="term-btn" onclick="resetQuota()" style="font-size: 0.65rem; padding: 0.15rem 0.5rem;">RESET_QUOTA</button>
+                    <button class="mac-btn" onclick="resetQuota()" style="font-size: 0.7rem; padding: 0.2rem 0.65rem;">
+                        Reset Quota
+                    </button>
                 </div>
             </div>
-            <div class="box-body" style="padding: 1rem 1.25rem;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <!-- TV Series Card -->
-                    <div class="telem-cell" style="padding: 0.85rem 1rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="telem-key">📺 TV SERIES (MAX 2 EPS / DAY)</span>
-                            <span id="quota-ep-status" style="font-size: 0.72rem; color: var(--green); font-weight: 600;">2 REMAINING</span>
+
+            <div class="quota-grid">
+                <!-- TV Series Card -->
+                <div class="quota-card">
+                    <div class="quota-header-split">
+                        <div class="quota-badge-title">
+                            <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+                            <span>TV Series</span>
                         </div>
-                        <div style="display: flex; align-items: baseline; gap: 0.75rem; margin: 0.35rem 0;">
-                            <span class="telem-val" id="quota-ep-ratio" style="font-size: 1.5rem; color: var(--text-main);">0 / 2</span>
-                            <span id="quota-ep-bar" style="font-family: var(--font-mono); color: var(--cyan); letter-spacing: 0.1em; font-size: 0.95rem;">[ ░ ░ ]</span>
-                        </div>
-                        <div class="telem-sub" id="quota-ep-desc">Watched: None yet today</div>
+                        <span class="quota-pill-status" id="quota-ep-status">2 Remaining</span>
                     </div>
 
-                    <!-- Movie Card -->
-                    <div class="telem-cell" style="padding: 0.85rem 1rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="telem-key">🎬 FEATURE MOVIE (MAX 1 / DAY)</span>
-                            <span id="quota-movie-status" style="font-size: 0.72rem; color: var(--green); font-weight: 600;">1 REMAINING</span>
+                    <div class="quota-meter-capsules" id="episodes-capsule-bar">
+                        <div class="capsule-segment" id="ep-seg-1"></div>
+                        <div class="capsule-segment" id="ep-seg-2"></div>
+                    </div>
+
+                    <div class="quota-stats-meta">
+                        <span class="quota-numbers" id="quota-ep-ratio">0 / 2</span>
+                        <span class="quota-desc-small" id="quota-ep-desc">Watched: None yet today</span>
+                    </div>
+                </div>
+
+                <!-- Feature Movie Card -->
+                <div class="quota-card">
+                    <div class="quota-header-split">
+                        <div class="quota-badge-title">
+                            <svg viewBox="0 0 24 24" style="fill: var(--apple-orange);"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
+                            <span>Feature Film</span>
                         </div>
-                        <div style="display: flex; align-items: baseline; gap: 0.75rem; margin: 0.35rem 0;">
-                            <span class="telem-val" id="quota-movie-ratio" style="font-size: 1.5rem; color: var(--text-main);">0 / 1</span>
-                            <span id="quota-movie-bar" style="font-family: var(--font-mono); color: var(--amber); letter-spacing: 0.1em; font-size: 0.95rem;">[ ░ ]</span>
-                        </div>
-                        <div class="telem-sub" id="quota-movie-desc">Watched: None yet today</div>
+                        <span class="quota-pill-status" id="quota-movie-status">1 Remaining</span>
+                    </div>
+
+                    <div class="quota-meter-capsules" id="movies-capsule-bar">
+                        <div class="capsule-segment" id="mov-seg-1"></div>
+                    </div>
+
+                    <div class="quota-stats-meta">
+                        <span class="quota-numbers" id="quota-movie-ratio">0 / 1</span>
+                        <span class="quota-desc-small" id="quota-movie-desc">Watched: None yet today</span>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Main 2-Column Section -->
-        <div class="grid-2col">
-            <!-- Left: Distraction Matrix & Recent History -->
-            <div class="box">
-                <div class="box-header">
-                    <div><span class="tag-id">[02]</span> REFLEX_FREQUENCY // DISTRACTION_MATRIX</div>
-                    <div style="color: var(--text-muted); font-size: 0.7rem;" id="sync-indicator">SYNC: LIVE</div>
-                </div>
-                <div class="box-body" style="padding: 0.8rem 1rem;">
-                    <table class="ascii-table">
-                        <thead>
-                            <tr>
-                                <th>TARGET</th>
-                                <th>TODAY</th>
-                                <th>HISTORY</th>
-                                <th>INTENSITY</th>
-                            </tr>
-                        </thead>
-                        <tbody id="matrix-tbody">
-                            <tr>
-                                <td colspan="4" style="color: var(--text-dim); text-align: center; padding: 1.5rem 0;">
-                                    Analyzing real browser history database...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Bento Telemetry Stats Strip -->
+        <section class="telemetry-row">
+            <div class="stat-bento-card">
+                <span class="stat-icon-label" style="color: var(--apple-green);">
+                    <span>🛡️</span> Pauses Today
+                </span>
+                <span class="stat-val-huge" id="stat-total" style="color: var(--apple-green);">0</span>
+                <span class="stat-foot-note">Distractions averted</span>
             </div>
 
-            <!-- Right: Focus Chronometer -->
-            <div class="box">
-                <div class="box-header">
-                    <div><span class="tag-id">[03]</span> CHRONO_MODULE // CADENCE</div>
-                    <div style="color: var(--text-dim); font-size: 0.7rem;">BLOCK: 25M</div>
+            <div class="stat-bento-card">
+                <span class="stat-icon-label" style="color: var(--apple-blue);">
+                    <span>⚡</span> Time Preserved
+                </span>
+                <span class="stat-val-huge" id="stat-time" style="color: var(--apple-cyan);">0m</span>
+                <span class="stat-foot-note">Estimated focus gained</span>
+            </div>
+
+            <div class="stat-bento-card">
+                <span class="stat-icon-label" style="color: var(--apple-purple);">
+                    <span>🎙️</span> Deep-Dives Allowed
+                </span>
+                <span class="stat-val-huge" id="stat-allowed" style="color: var(--apple-purple);">0</span>
+                <span class="stat-foot-note">Podcasts & lectures</span>
+            </div>
+
+            <div class="stat-bento-card">
+                <span class="stat-icon-label" style="color: var(--apple-orange);">
+                    <span>📊</span> Peak Distraction
+                </span>
+                <span class="stat-val-huge" id="stat-peak" style="font-size: 1.85rem; color: var(--apple-orange);">--:--</span>
+                <span class="stat-foot-note">Learned from Safari/Arc</span>
+            </div>
+        </section>
+
+        <!-- 2-Column Split: Screen Time Matrix & Focus Sprint Timer -->
+        <div class="split-grid-2col">
+            <!-- Left: Screen Time Distraction Insights -->
+            <section class="glass-card">
+                <div class="card-header-row">
+                    <div class="card-title-group">
+                        <span class="card-eyebrow">Screen Time Analytics</span>
+                        <h2 class="card-title">Reflex Frequency</h2>
+                    </div>
+                    <span class="nav-meta-item" id="sync-indicator">Live Synced</span>
                 </div>
-                <div class="box-body" style="align-items: center; padding: 1.5rem 1rem;">
-                    <div class="chrono-display" id="chrono-text">25:00</div>
-                    <div class="chrono-actions">
-                        <button class="key-btn" id="chrono-toggle-btn" onclick="toggleChrono()">
-                            <span id="chrono-btn-label">START_BLOCK</span>
-                            <span class="shortcut-badge">SPACE</span>
+                <div class="screen-time-table" id="matrix-container">
+                    <div style="color: var(--text-tertiary); text-align: center; padding: 2rem 0; font-size: 0.85rem;">
+                        Analyzing browser history database...
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right: Apple Clock Style Focus Sprint Timer -->
+            <section class="glass-card">
+                <div class="card-header-row">
+                    <div class="card-title-group">
+                        <span class="card-eyebrow">Single-Task Sprint</span>
+                        <h2 class="card-title">Focus Block</h2>
+                    </div>
+                    <span class="pill-badge" style="background: rgba(255, 255, 255, 0.08); color: var(--text-secondary); border-color: rgba(255, 255, 255, 0.12);">
+                        25 Min
+                    </span>
+                </div>
+                <div class="timer-stage">
+                    <div class="timer-digits" id="chrono-text">25:00</div>
+                    <div class="timer-controls">
+                        <button class="timer-primary-btn" id="chrono-toggle-btn" onclick="toggleChrono()">
+                            <span id="chrono-btn-label">Start Block</span>
+                            <span class="shortcut-pill">Space</span>
                         </button>
-                        <button class="key-btn" onclick="resetChrono()">
-                            <span>RESET</span>
-                            <span class="shortcut-badge">R</span>
+                        <button class="timer-secondary-btn" onclick="resetChrono()">
+                            <span>Reset</span>
+                            <span class="shortcut-pill">R</span>
                         </button>
                     </div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem;">
-                        Target: Single-task focus sprint with zero tab switching.
+                    <div style="font-size: 0.75rem; color: var(--text-tertiary); text-align: center;">
+                        Dedicated sprint with zero tab switching.
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
 
-        <!-- Direct Portals Matrix -->
-        <div class="box">
-            <div class="box-header">
-                <div><span class="tag-id">[04]</span> INTENTIONAL_PORTALS // WORKSPACES</div>
-                <div style="color: var(--text-muted); font-size: 0.7rem;">HOTKEYS: [ 1 - 6 ]</div>
-            </div>
-            <div class="box-body">
-                <div class="portals-list" id="portals-container">
-                    <a href="https://github.com" target="_blank" class="portal-item" onclick="playClick()">
-                        <span class="portal-num">[1] GITHUB</span>
-                        <span class="portal-tag">github.com</span>
-                    </a>
-                    <a href="https://notion.so" target="_blank" class="portal-item" onclick="playClick()">
-                        <span class="portal-num">[2] NOTION</span>
-                        <span class="portal-tag">notion.so</span>
-                    </a>
-                    <a href="https://chatgpt.com" target="_blank" class="portal-item" onclick="playClick()">
-                        <span class="portal-num">[3] CHATGPT</span>
-                        <span class="portal-tag">chatgpt.com</span>
-                    </a>
-                    <a href="https://claude.ai" target="_blank" class="portal-item" onclick="playClick()">
-                        <span class="portal-num">[4] CLAUDE</span>
-                        <span class="portal-tag">claude.ai</span>
-                    </a>
-                    <a href="https://leetcode.com" target="_blank" class="portal-item" onclick="playClick()">
-                        <span class="portal-num">[5] LEETCODE</span>
-                        <span class="portal-tag">leetcode.com</span>
-                    </a>
-                    <a href="https://canvas.chalmers.se" target="_blank" class="portal-item" onclick="playClick()">
-                        <span class="portal-num">[6] CHALMERS</span>
-                        <span class="portal-tag">canvas.chalmers.se</span>
-                    </a>
+        <!-- macOS Dock Launchpad Intentional Workspaces -->
+        <section class="glass-card">
+            <div class="card-header-row">
+                <div class="card-title-group">
+                    <span class="card-eyebrow">Quick Workspaces</span>
+                    <h2 class="card-title">Intentional Portals</h2>
                 </div>
+                <span class="nav-meta-item">Keys 1 – 6</span>
             </div>
-        </div>
+            <div class="dock-portals-grid" id="portals-container">
+                <!-- Dynamically injected from active persona -->
+            </div>
+        </section>
 
-        <!-- Terminal Interactive Command Prompt -->
-        <div class="cli-prompt-bar">
-            <span class="cli-user">reflex@macos</span><span style="color: var(--text-muted);">:</span><span style="color: var(--cyan);">~</span><span style="color: var(--text-muted);">$</span>
-            <span style="color: var(--text-main);" id="cli-feedback">status --all --guard=active</span>
-            <span class="cli-cursor"></span>
+        <!-- System Pill Footer -->
+        <div class="system-pill-footer">
+            <div>
+                <b>Reflex Guard</b> • <span id="cli-feedback">Active • Protection Enabled</span>
+            </div>
+            <div>
+                Shortcuts: <b>Space</b> (Timer) • <b>R</b> (Reset) • <b>M</b> (Audio) • <b>1-6</b> (Portals)
+            </div>
         </div>
 
         <footer>
-            REFLEX_MAC // JEV_SYSTEM_ONE_DECISION_ENGINE // MPS_ACCELERATED
+            Designed for macOS • Local SQLite & Neural Decision Engine
         </footer>
     </div>
 
     <script>
-        // --- 1. Acoustic Synthesizer (432Hz Tibetan Bowl + Camera Dial Detent Click) ---
+        // --- 1. Sound Synthesis Engine (Web Audio API) ---
         let audioCtx = null;
         let sfxEnabled = localStorage.getItem('reflex_sfx') !== 'false';
 
         function getAudioContext() {
             if (!sfxEnabled) return null;
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContextClass) return null;
-            if (!audioCtx || audioCtx.state === 'closed') {
-                audioCtx = new AudioContextClass();
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
             }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume().catch(() => {});
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
             }
             return audioCtx;
         }
 
-        function playTibetanBowl(fundamental = 432, duration = 4.0, gain = 0.25) {
+        function playTibetanBowl(fundamental = 432, duration = 3.5, masterGain = 0.22) {
             const ctx = getAudioContext();
             if (!ctx) return;
             try {
                 const now = ctx.currentTime;
                 const master = ctx.createGain();
                 master.gain.setValueAtTime(0.0001, now);
-                master.gain.linearRampToValueAtTime(gain, now + 0.02);
+                master.gain.exponentialRampToValueAtTime(masterGain, now + 0.08);
                 master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
                 master.connect(ctx.destination);
 
-                const modes = [
-                    { f: fundamental, g: 0.55, d: duration },
-                    { f: fundamental * 1.003, g: 0.45, d: duration * 0.95 },
-                    { f: fundamental * 2.76, g: 0.20, d: duration * 0.65 },
-                    { f: fundamental * 5.40, g: 0.08, d: duration * 0.35 }
+                const harmonics = [
+                    { ratio: 1.0,  gain: 1.0 },
+                    { ratio: 2.76, gain: 0.38 },
+                    { ratio: 5.40, gain: 0.16 },
+                    { ratio: 8.93, gain: 0.06 }
                 ];
 
-                modes.forEach(m => {
+                harmonics.forEach(h => {
                     const osc = ctx.createOscillator();
                     const g = ctx.createGain();
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(m.f, now);
-                    g.gain.setValueAtTime(m.g, now);
-                    g.gain.exponentialRampToValueAtTime(0.0001, now + m.d);
+                    osc.frequency.setValueAtTime(fundamental * h.ratio, now);
+                    g.gain.setValueAtTime(h.gain, now);
                     osc.connect(g);
                     g.connect(master);
                     osc.start(now);
-                    osc.stop(now + m.d);
+                    osc.stop(now + duration);
                 });
             } catch (e) {}
         }
@@ -805,17 +1175,17 @@
             try {
                 const now = ctx.currentTime;
                 const g = ctx.createGain();
-                g.gain.setValueAtTime(0.12, now);
-                g.gain.exponentialRampToValueAtTime(0.0001, now + 0.012);
+                g.gain.setValueAtTime(0.08, now);
+                g.gain.exponentialRampToValueAtTime(0.0001, now + 0.015);
                 g.connect(ctx.destination);
 
                 const osc = ctx.createOscillator();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(1800, now);
-                osc.frequency.exponentialRampToValueAtTime(800, now + 0.012);
+                osc.frequency.setValueAtTime(1400, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.015);
                 osc.connect(g);
                 osc.start(now);
-                osc.stop(now + 0.014);
+                osc.stop(now + 0.018);
             } catch (e) {}
         }
 
@@ -825,21 +1195,21 @@
             const btn = document.getElementById('audio-toggle-btn');
             if (sfxEnabled) {
                 btn.classList.add('active');
-                btn.innerText = 'SFX: [ 432Hz + CLICK ]';
+                btn.innerHTML = '<span>🔊</span><span>Sound: 432Hz</span>';
                 playTibetanBowl(432, 2.0, 0.15);
             } else {
                 btn.classList.remove('active');
-                btn.innerText = 'SFX: [ MUTED ]';
+                btn.innerHTML = '<span>🔇</span><span>Sound: Muted</span>';
             }
         }
 
         window.addEventListener('click', () => {
             if (sfxEnabled && !audioCtx) {
-                playTibetanBowl(432, 3.0, 0.20);
+                playTibetanBowl(432, 3.0, 0.18);
             }
         }, { once: true });
 
-        // --- 2. Live Telemetry Clock ---
+        // --- 2. Live Cupertino Status Clock ---
         function updateClock() {
             const d = new Date();
             document.getElementById('time-display').innerText = d.toLocaleTimeString([], { hour12: false });
@@ -847,21 +1217,38 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // --- 3. Dynamic ASCII Breathing Wave ---
-        const breathStates = [
-            { text: "INHALE GENTLY . . .", bar: "[ ░░░░░░░░░░████████████████████░░░░░░░░░░ ]" },
-            { text: "HOLD MOMENTARILY . .", bar: "[ ████████████████████████████████████████ ]" },
-            { text: "RELEASE & SOFTEN . .", bar: "[ ░░░░░░░░░░░░░░░░████████░░░░░░░░░░░░░░░░ ]" },
-            { text: "STILLNESS . . . . .", bar: "[ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ ]" }
-        ];
-        let breathIdx = 0;
-        setInterval(() => {
-            breathIdx = (breathIdx + 1) % breathStates.length;
-            document.getElementById('breath-state').innerText = breathStates[breathIdx].text;
-            document.getElementById('breath-ascii').innerText = breathStates[breathIdx].bar;
-        }, 3000);
+        // --- 3. Apple Watch Mindfulness Breath Cycle ---
+        const lotus = document.getElementById('lotus-flower');
+        const breathStateLabel = document.getElementById('breath-state');
 
-        // --- 4. Chronometer Module ---
+        function runBreatheCycle() {
+            // Inhale phase (4 seconds)
+            lotus.classList.remove('exhale');
+            lotus.classList.add('inhale');
+            breathStateLabel.innerText = "Inhale Gently";
+
+            setTimeout(() => {
+                // Hold phase (2 seconds)
+                breathStateLabel.innerText = "Hold & Center";
+
+                setTimeout(() => {
+                    // Exhale phase (4 seconds)
+                    lotus.classList.remove('inhale');
+                    lotus.classList.add('exhale');
+                    breathStateLabel.innerText = "Release Slowly";
+
+                    setTimeout(() => {
+                        // Rest phase (2 seconds)
+                        breathStateLabel.innerText = "Be Still";
+                    }, 4000);
+                }, 2000);
+            }, 4000);
+        }
+
+        runBreatheCycle();
+        setInterval(runBreatheCycle, 12000);
+
+        // --- 4. Focus Sprint Timer Module ---
         let chronoSeconds = 25 * 60;
         let chronoTimer = null;
         let isChronoRunning = false;
@@ -879,12 +1266,12 @@
             if (isChronoRunning) {
                 clearInterval(chronoTimer);
                 isChronoRunning = false;
-                lbl.innerText = 'RESUME_BLOCK';
-                btn.classList.remove('active');
+                lbl.innerText = 'Resume Block';
+                btn.classList.remove('running');
             } else {
                 isChronoRunning = true;
-                lbl.innerText = 'PAUSE_BLOCK';
-                btn.classList.add('active');
+                lbl.innerText = 'Pause Block';
+                btn.classList.add('running');
                 playTibetanBowl(432, 2.5, 0.2);
                 chronoTimer = setInterval(() => {
                     if (chronoSeconds > 0) {
@@ -893,10 +1280,10 @@
                     } else {
                         clearInterval(chronoTimer);
                         isChronoRunning = false;
-                        lbl.innerText = 'START_BLOCK';
-                        btn.classList.remove('active');
-                        playTibetanBowl(528, 5.0, 0.35); // 528Hz Solfeggio
-                        alert("[REFLEX] Focus block complete. Take a 5m breather.");
+                        lbl.innerText = 'Start Block';
+                        btn.classList.remove('running');
+                        playTibetanBowl(528, 5.0, 0.35);
+                        alert("Reflex Focus Block complete. Take a 5-minute break.");
                         resetChrono();
                     }
                 }, 1000);
@@ -909,11 +1296,11 @@
             isChronoRunning = false;
             chronoSeconds = 25 * 60;
             updateChronoDisplay();
-            document.getElementById('chrono-btn-label').innerText = 'START_BLOCK';
-            document.getElementById('chrono-toggle-btn').classList.remove('active');
+            document.getElementById('chrono-btn-label').innerText = 'Start Block';
+            document.getElementById('chrono-toggle-btn').classList.remove('running');
         }
 
-        // --- 4.5 Profiles & Personas Management ---
+        // --- 5. Persona Switcher & Workspaces ---
         let currentProfiles = [];
         let activeProfileId = 'general';
         let currentPortals = [];
@@ -927,9 +1314,9 @@
             container.innerHTML = currentProfiles.map(p => {
                 const isActive = p.id === activeId;
                 return `
-                    <button class="profile-btn ${isActive ? 'active' : ''}" onclick="selectProfile('${p.id}')">
-                        <span class="p-badge">${p.badge}</span>
-                        <span class="p-name">${p.name}</span>
+                    <button class="segment-btn ${isActive ? 'active' : ''}" onclick="selectProfile('${p.id}')">
+                        <span>${p.badge}</span>
+                        <span>${p.name}</span>
                     </button>
                 `;
             }).join('');
@@ -941,6 +1328,21 @@
             }
         }
 
+        const portalIcons = {
+            'github.com': '🐙',
+            'notion.so': '📓',
+            'chatgpt.com': '✨',
+            'claude.ai': '🧠',
+            'linear.app': '📐',
+            'leetcode.com': '⚡',
+            'figma.com': '🎨',
+            'canvas.chalmers.se': '🏛️',
+            'google.com': '🌐',
+            'docs.google.com': '📄',
+            'mail.google.com': '✉️',
+            'stripe.com': '💳'
+        };
+
         function renderPortals(portalsList) {
             currentPortals = portalsList || [];
             const container = document.getElementById('portals-container');
@@ -948,10 +1350,12 @@
 
             container.innerHTML = currentPortals.map((item, idx) => {
                 const num = idx + 1;
+                const icon = portalIcons[item.tag] || '🚀';
                 return `
-                    <a href="${item.url}" target="_blank" class="portal-item" onclick="playClick()">
-                        <span class="portal-num">[${num}] ${item.name}</span>
-                        <span class="portal-tag">${item.tag}</span>
+                    <a href="${item.url}" target="_blank" class="portal-app-tile" onclick="playClick()">
+                        <span class="portal-key-shortcut">⌘${num}</span>
+                        <div class="portal-icon-squircle">${icon}</div>
+                        <span class="portal-app-name">${item.name}</span>
                     </a>
                 `;
             }).join('');
@@ -968,10 +1372,10 @@
                         document.getElementById('active-profile-tagline').innerText = data.profile.tagline;
                         renderPortals(data.profile.portals);
                     }
-                    document.querySelectorAll('.profile-btn').forEach(btn => {
+                    document.querySelectorAll('.segment-btn').forEach(btn => {
                         btn.classList.remove('active');
                     });
-                    const btns = document.querySelectorAll('.profile-btn');
+                    const btns = document.querySelectorAll('.segment-btn');
                     currentProfiles.forEach((p, i) => {
                         if (p.id === id && btns[i]) btns[i].classList.add('active');
                     });
@@ -995,7 +1399,7 @@
             }
         }
 
-        // --- 5. Hotkeys & CLI Interaction ---
+        // --- 6. Hotkeys (Apple Style) ---
         window.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT') return;
 
@@ -1010,19 +1414,13 @@
                 const idx = parseInt(e.key) - 1;
                 if (currentPortals && currentPortals[idx]) {
                     playClick();
-                    document.getElementById('cli-feedback').innerText = `open portal [${e.key}] -> ${currentPortals[idx].url}`;
+                    document.getElementById('cli-feedback').innerText = `Opening [${currentPortals[idx].name}] → ${currentPortals[idx].url}`;
                     setTimeout(() => window.open(currentPortals[idx].url, '_blank'), 150);
                 }
             }
         });
 
-        // --- 6. Live Telemetry Fetching ---
-        function renderAsciiBar(pct) {
-            const totalChars = 14;
-            const filled = Math.round((pct / 100) * totalChars);
-            return '█'.repeat(filled) + '░'.repeat(totalChars - filled);
-        }
-
+        // --- 7. Live Telemetry Fetching ---
         async function fetchTelemetry() {
             try {
                 const [statsRes, histRes] = await Promise.all([
@@ -1043,15 +1441,15 @@
                         fetchProfiles();
                     }
 
-                    const profileBadge = stats.profile_details?.badge || '[FOCUS]';
+                    const profileBadge = stats.profile_details?.badge || 'Focus';
                     if (allowedList.length > 0) {
                         const last = allowedList[allowedList.length - 1];
-                        const titlePreview = (last.title || '').slice(0, 28);
+                        const titlePreview = (last.title || '').slice(0, 32);
                         document.getElementById('cli-feedback').innerText =
-                            `status ${profileBadge} --guard=active --allowed=[${titlePreview}]`;
+                            `${profileBadge} Mode Active • Allowed: "${titlePreview}"`;
                     } else {
                         document.getElementById('cli-feedback').innerText =
-                            `status ${profileBadge} --guard=active --mode=calm`;
+                            `${profileBadge} Mode Active • Guarding cognitive flow`;
                     }
 
                     // Mindful Entertainment Quota update
@@ -1060,56 +1458,73 @@
                         const epUsed = q.episodes_used || 0;
                         const epMax = q.episodes_max || 2;
                         const epRem = Math.max(0, epMax - epUsed);
-                        const epBar = '[ ' + '█ '.repeat(epUsed) + '░ '.repeat(epRem) + ']';
 
                         const movUsed = q.movies_used || 0;
                         const movMax = q.movies_max || 1;
                         const movRem = Math.max(0, movMax - movUsed);
-                        const movBar = '[ ' + '█ '.repeat(movUsed) + '░ '.repeat(movRem) + ']';
 
                         const epRatioEl = document.getElementById('quota-ep-ratio');
                         if (epRatioEl) epRatioEl.innerText = `${epUsed} / ${epMax}`;
-                        const epBarEl = document.getElementById('quota-ep-bar');
-                        if (epBarEl) epBarEl.innerText = epBar;
+
+                        // Update capsule segments for TV series
+                        const seg1 = document.getElementById('ep-seg-1');
+                        const seg2 = document.getElementById('ep-seg-2');
+                        if (seg1) {
+                            if (epUsed >= 1) seg1.classList.add('filled-series');
+                            else seg1.classList.remove('filled-series');
+                        }
+                        if (seg2) {
+                            if (epUsed >= 2) seg2.classList.add('filled-series');
+                            else seg2.classList.remove('filled-series');
+                        }
+
                         const epStatusEl = document.getElementById('quota-ep-status');
                         if (epStatusEl) {
                             if (epRem === 0) {
-                                epStatusEl.innerText = 'LIMIT REACHED';
-                                epStatusEl.style.color = 'var(--rose)';
+                                epStatusEl.innerText = 'Limit Reached';
+                                epStatusEl.className = 'quota-pill-status limit';
                             } else {
-                                epStatusEl.innerText = `${epRem} REMAINING`;
-                                epStatusEl.style.color = 'var(--green)';
+                                epStatusEl.innerText = `${epRem} Remaining`;
+                                epStatusEl.className = 'quota-pill-status';
                             }
                         }
+
                         const epDescEl = document.getElementById('quota-ep-desc');
                         if (epDescEl) {
                             if (q.episodes_list && q.episodes_list.length > 0) {
                                 const lastEp = q.episodes_list[q.episodes_list.length - 1];
-                                epDescEl.innerText = `Latest: ${lastEp.title.slice(0, 36)}`;
+                                epDescEl.innerText = `Latest: ${lastEp.title.slice(0, 32)}`;
                             } else {
                                 epDescEl.innerText = 'Watched: None yet today';
                             }
                         }
 
+                        // Update capsule segment for movies
                         const movRatioEl = document.getElementById('quota-movie-ratio');
                         if (movRatioEl) movRatioEl.innerText = `${movUsed} / ${movMax}`;
-                        const movBarEl = document.getElementById('quota-movie-bar');
-                        if (movBarEl) movBarEl.innerText = movBar;
+
+                        const movSeg1 = document.getElementById('mov-seg-1');
+                        if (movSeg1) {
+                            if (movUsed >= 1) movSeg1.classList.add('filled-movie');
+                            else movSeg1.classList.remove('filled-movie');
+                        }
+
                         const movStatusEl = document.getElementById('quota-movie-status');
                         if (movStatusEl) {
                             if (movRem === 0) {
-                                movStatusEl.innerText = 'LIMIT REACHED';
-                                movStatusEl.style.color = 'var(--rose)';
+                                movStatusEl.innerText = 'Limit Reached';
+                                movStatusEl.className = 'quota-pill-status limit';
                             } else {
-                                movStatusEl.innerText = `${movRem} REMAINING`;
-                                movStatusEl.style.color = 'var(--green)';
+                                movStatusEl.innerText = `${movRem} Remaining`;
+                                movStatusEl.className = 'quota-pill-status';
                             }
                         }
+
                         const movDescEl = document.getElementById('quota-movie-desc');
                         if (movDescEl) {
                             if (q.movies_list && q.movies_list.length > 0) {
                                 const lastMov = q.movies_list[q.movies_list.length - 1];
-                                movDescEl.innerText = `Latest: ${lastMov.title.slice(0, 36)}`;
+                                movDescEl.innerText = `Latest: ${lastMov.title.slice(0, 32)}`;
                             } else {
                                 movDescEl.innerText = 'Watched: None yet today';
                             }
@@ -1117,7 +1532,7 @@
 
                         const statusLbl = document.getElementById('quota-status-label');
                         if (statusLbl) {
-                            statusLbl.innerText = `SERIES: ${epUsed}/${epMax} EPS | MOVIES: ${movUsed}/${movMax} FILM`;
+                            statusLbl.innerText = `Series: ${epUsed}/${epMax} Eps • Movies: ${movUsed}/${movMax} Film`;
                         }
                     }
                 }
@@ -1132,25 +1547,26 @@
                     }
 
                     const top = hist.top_distractions || [];
-                    const tbody = document.getElementById('matrix-tbody');
-                    if (top.length > 0) {
-                        const maxCount = top[0].count;
-                        tbody.innerHTML = top.slice(0, 5).map(item => {
+                    const container = document.getElementById('matrix-container');
+                    if (top.length > 0 && container) {
+                        const maxCount = Math.max(...top.map(t => t.count), 1);
+                        container.innerHTML = top.slice(0, 5).map(item => {
                             const pct = Math.round((item.count / maxCount) * 100);
                             return `
-                                <tr>
-                                    <td style="color: var(--text-main); font-weight: 500;">${item.domain}</td>
-                                    <td style="color: var(--rose); font-family: var(--font-mono);">${item.count}</td>
-                                    <td style="color: var(--text-dim);">${item.count > 10 ? 'HIGH' : 'LOW'}</td>
-                                    <td><span class="ascii-bar-fill">${renderAsciiBar(pct)}</span></td>
-                                </tr>
+                                <div class="screen-time-row">
+                                    <span class="st-domain-label" title="${item.domain}">${item.domain}</span>
+                                    <div class="st-track-outer">
+                                        <div class="st-track-fill" style="width: ${pct}%;"></div>
+                                    </div>
+                                    <span class="st-count-label">${item.count}</span>
+                                </div>
                             `;
                         }).join('');
                     }
                 }
-                document.getElementById('sync-indicator').innerText = 'SYNC: LIVE';
+                document.getElementById('sync-indicator').innerText = 'Live Synced';
             } catch (e) {
-                document.getElementById('sync-indicator').innerText = 'SYNC: LOCAL';
+                document.getElementById('sync-indicator').innerText = 'Local Mode';
             }
         }
 
