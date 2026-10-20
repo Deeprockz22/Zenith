@@ -26,10 +26,11 @@ PODCAST_KEYWORDS = [
 
 EDUCATIONAL_KEYWORDS = [
     "tutorial", "course", "lecture", "how to", "engineering", "math",
-    "python", "chalmers", "coding", "deep learning", "documentary", "mit",
-    "stanford", "cs50", "crash course", "explanation", "analysis", "study",
-    "mechanics", "cfd", "machine learning", "homework", "exam", "research",
-    "computerphile", "numberphile", "veritasium", "3blue1brown"
+    "python", "student", "university", "syllabus", "assignment", "coding",
+    "deep learning", "documentary", "mit", "stanford", "harvard", "cs50",
+    "crash course", "explanation", "analysis", "study", "mechanics", "cfd",
+    "machine learning", "homework", "exam", "research", "computerphile",
+    "numberphile", "veritasium", "3blue1brown"
 ]
 
 HIGH_RISK_KEYWORDS = [
@@ -110,6 +111,22 @@ def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
             "domain": host,
             "model": "fast-whitelist"
         }
+
+    # For Student & Scholar profile, any institutional/university domain is automatically whitelisted
+    if profile.get("id") == "academic":
+        if (
+            host.endswith(".edu") or ".edu." in host or
+            host.endswith(".ac.uk") or ".ac." in host or
+            "instructure.com" in host or "blackboard.com" in host or "moodle" in host or
+            "canvas" in host or "classroom.google.com" in host
+        ):
+            return {
+                "action": "ALLOW",
+                "reason": f"University & Academic Portal ({host})",
+                "category": "productive",
+                "domain": host,
+                "model": "fast-whitelist"
+            }
 
     # Only invoke deep analysis for entertainment or distraction domains
     is_entertainment = any(host == e or host.endswith("." + e) for e in KNOWN_ENTERTAINMENT_ROOTS)

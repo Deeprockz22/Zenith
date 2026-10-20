@@ -34,12 +34,13 @@ KNOWN_PODCAST_ROOTS = {
 }
 
 KNOWN_PRODUCTIVE_ROOTS = {
-    "github.com", "overleaf.com", "canvas.chalmers.se", "sso.canvaslms.com",
-    "chalmers.se", "notion.so", "chatgpt.com", "claude.ai", "arxiv.org",
-    "scholar.google.com", "stackoverflow.com", "mail.google.com", "docs.google.com",
-    "leetcode.com", "huggingface.co", "linear.app",
-    "podcasts.apple.com", "open.spotify.com", "spotify.com",
-    "overcast.fm", "pocketcasts.com", "podbean.com", "castbox.fm",
+    "github.com", "overleaf.com", "canvas.instructure.com", "instructure.com",
+    "canvaslms.com", "sso.canvaslms.com", "classroom.google.com", "blackboard.com",
+    "moodle.org", "quizlet.com", "coursera.org", "edx.org", "khanacademy.org",
+    "notion.so", "chatgpt.com", "claude.ai", "arxiv.org", "scholar.google.com",
+    "stackoverflow.com", "mail.google.com", "docs.google.com", "leetcode.com",
+    "huggingface.co", "linear.app", "podcasts.apple.com", "open.spotify.com",
+    "spotify.com", "overcast.fm", "pocketcasts.com", "podbean.com", "castbox.fm",
     "stitcher.com", "audible.com", "ted.com", "npr.org"
 }
 
@@ -104,8 +105,14 @@ def analyze_history(limit=500, profile_id=None):
                 continue
 
             # Classify host
+            is_edu_domain = (
+                host.endswith(".edu") or ".edu." in host or
+                host.endswith(".ac.uk") or ".ac." in host or
+                "instructure.com" in host or "blackboard.com" in host or "moodle" in host or
+                "canvas" in host
+            )
             is_distraction = any(host == d or host.endswith("." + d) for d in KNOWN_ENTERTAINMENT_ROOTS)
-            is_productive = any(host == p or host.endswith("." + p) for p in profile_productive)
+            is_productive = is_edu_domain or any(host == p or host.endswith("." + p) for p in profile_productive)
 
             if is_distraction:
                 distraction_counts[host] += visit_count

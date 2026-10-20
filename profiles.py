@@ -40,28 +40,31 @@ PROFILES = {
 
     "academic": {
         "id": "academic",
-        "name": "Academic & Research",
-        "badge": "[SCHOLAR]",
-        "tagline": "PAPERS // LATEX // CITATIONS // EXPERIMENTS",
-        "description": "Tailored for PhD students, academic researchers, and university coursework.",
+        "name": "Student & Scholar",
+        "badge": "[STUDENT]",
+        "tagline": "COURSES // STUDY // RESEARCH // ASSIGNMENTS",
+        "description": "Tailored for students, university scholars, and academic researchers worldwide.",
         "productive_domains": {
+            "canvas.instructure.com", "instructure.com", "canvaslms.com", "sso.canvaslms.com",
+            "classroom.google.com", "blackboard.com", "moodle.org", "moodle.com",
+            "quizlet.com", "coursera.org", "edx.org", "khanacademy.org",
             "overleaf.com", "arxiv.org", "scholar.google.com", "nature.com", "science.org",
-            "sciencedirect.com", "jstor.org", "canvas.chalmers.se", "sso.canvaslms.com",
-            "chalmers.se", "notion.so", "chatgpt.com", "claude.ai", "researchgate.net",
-            "semanticscholar.org", "github.com", "docs.google.com"
+            "sciencedirect.com", "jstor.org", "researchgate.net", "semanticscholar.org",
+            "notion.so", "chatgpt.com", "claude.ai", "docs.google.com", "github.com"
         },
         "allowed_keywords": [
             "lecture", "mit", "stanford", "cs50", "lecture notes", "symposium", "dissertation",
             "physics", "mathematics", "biology", "mechanics", "cfd", "neural network", "paper review",
             "deep dive", "documentary", "huberman lab", "lex fridman", "mindscape", "veritasium",
-            "3blue1brown", "computerphile", "numberphile", "audiobook", "thesis", "coursework"
+            "3blue1brown", "computerphile", "numberphile", "audiobook", "thesis", "coursework",
+            "study", "homework", "exam", "syllabus", "tutorial", "academic", "university", "assignment"
         ],
         "allowed_types": ["podcast", "lecture"],
         "portals": [
-            {"key": "1", "name": "OVERLEAF", "url": "https://overleaf.com", "tag": "overleaf.com"},
-            {"key": "2", "name": "ARXIV", "url": "https://arxiv.org", "tag": "arxiv.org"},
-            {"key": "3", "name": "SCHOLAR", "url": "https://scholar.google.com", "tag": "scholar.google.com"},
-            {"key": "4", "name": "CHALMERS_LMS", "url": "https://canvas.chalmers.se", "tag": "canvas.chalmers.se"},
+            {"key": "1", "name": "CANVAS LMS", "url": "https://canvas.instructure.com", "tag": "instructure.com"},
+            {"key": "2", "name": "GOOGLE SCHOLAR", "url": "https://scholar.google.com", "tag": "scholar.google.com"},
+            {"key": "3", "name": "OVERLEAF", "url": "https://overleaf.com", "tag": "overleaf.com"},
+            {"key": "4", "name": "ARXIV", "url": "https://arxiv.org", "tag": "arxiv.org"},
             {"key": "5", "name": "NOTION", "url": "https://notion.so", "tag": "notion.so"},
             {"key": "6", "name": "CLAUDE", "url": "https://claude.ai", "tag": "claude.ai"}
         ]
@@ -178,6 +181,8 @@ DEFAULT_PROFILE_ID = "general"
 
 def get_profile(profile_id=None):
     """Returns profile dictionary by ID, falling back to general."""
+    if profile_id == "student":
+        profile_id = "academic"
     if not profile_id or profile_id not in PROFILES:
         return PROFILES[DEFAULT_PROFILE_ID]
     return PROFILES[profile_id]

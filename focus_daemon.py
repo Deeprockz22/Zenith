@@ -278,6 +278,8 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             from urllib.parse import parse_qs
             qs = parse_qs(parsed.query)
             new_prof = qs.get("set", [None])[0]
+            if new_prof == "student":
+                new_prof = "academic"
             if new_prof and new_prof in PROFILES:
                 with stats_lock:
                     stats["active_profile"] = new_prof
@@ -359,6 +361,8 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             try:
                 body = json.loads(post_data.decode('utf-8'))
                 new_prof = body.get("profile")
+                if new_prof == "student":
+                    new_prof = "academic"
                 if new_prof in PROFILES:
                     with stats_lock:
                         stats["active_profile"] = new_prof
