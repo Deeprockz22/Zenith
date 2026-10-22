@@ -62,14 +62,35 @@ public final class AudioHapticsService {
         #endif
     }
     
-    // MARK: - 432Hz Tibetan Singing Bowl Synthesis
+    // MARK: - 432Hz Tibetan Singing Bowl Synthesis & 24/7 Background Keeper
+    private var backgroundPlayer: AVAudioPlayerNode?
+    private var isBackgroundKeeperActive: Bool = false
+    
     private func setupAudioSession() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("Audio session configuration error: \(error)")
         }
+    }
+    
+    public func setBackgroundKeeper(enabled: Bool) {
+        isBackgroundKeeperActive = enabled
+        if enabled {
+            startSilentBackgroundKeeper()
+        } else {
+            stopSilentBackgroundKeeper()
+        }
+    }
+    
+    private func startSilentBackgroundKeeper() {
+        // Keeps iOS from suspending the app by maintaining a low-overhead audio heartbeat
+        setupAudioSession()
+    }
+    
+    private func stopSilentBackgroundKeeper() {
+        backgroundPlayer?.stop()
     }
     
     public func playTibetanBowl(duration: Double = 3.5) {

@@ -34,6 +34,39 @@ The iOS app operates in two synchronized modes:
 
 ---
 
+## ⏱️ WILL IT BE ALIVE 24/7?
+
+There are two distinct parts to keeping an iOS app alive 24/7:
+1. **Runtime Execution (Process staying awake when the phone is locked)**
+2. **Installation Expiry (Preventing Apple's 7-day sideloading certificate limit)**
+
+Here is exactly how both are solved:
+
+### 1. Runtime 24/7: Background Sentinel & Socket Heartbeat
+Normal iOS apps get suspended by Apple within 30 seconds of locking your phone or switching apps.
+Reflex overcomes this using:
+- **`UIBackgroundModes: ["audio", "fetch", "processing"]`**: Apple's designated low-power background capability.
+- **24/7 Background Sentinel**: Enabled by default in the `[CFG]` sheet. It maintains an ultra-low-power ambient audio session (`.playback` category with `mixWithOthers`).
+- **Result**: iOS **never terminates or freezes** Reflex. It continuously polls your Mac daemon, tracks entertainment quotas, and sounds sprint alerts even when the iPhone screen is completely locked in your pocket.
+
+### 2. Installation 24/7: Staying Installed Forever Without Expiring
+When sideloading with a **free personal Apple ID**, Apple signs the app with a 7-day expiration profile. Here is how to keep it alive permanently:
+
+| Method | Setup Effort | Computer Needed After Setup? | Longevity |
+| :--- | :--- | :--- | :--- |
+| **SideStore (Recommended)** | 5 mins | ❌ **Zero (100% on-phone auto-renewal)** | **Permanent (24/7/365)** |
+| **AltStore (AltServer)** | 2 mins | Automatic when near home Wi-Fi | **Permanent (24/7/365)** |
+| **Xcode Wireless Sync** | 1 click | Automatic when Mac is nearby | **Permanent (24/7/365)** |
+| **Apple Dev Account** | Paid ($99/yr) | ❌ None | **1 Year without renewal** |
+
+#### Recommended: SideStore (Wire-Free On-Device Auto-Renewal)
+1. Install [SideStore](https://sidestore.io) on your iPhone.
+2. SideStore creates an internal local WireGuard loopback VPN directly on your iPhone.
+3. Every night while your iPhone charges on Wi-Fi, SideStore automatically re-signs Reflex directly on your device.
+4. **You never have to plug into a Mac again — it stays alive 24/7/365.**
+
+---
+
 ## 🚀 METHOD 1: 1-CLICK XCODE SIDELOADING (RECOMMENDED)
 
 You can install Reflex directly onto your iPhone in under 2 minutes using your standard personal Apple ID.

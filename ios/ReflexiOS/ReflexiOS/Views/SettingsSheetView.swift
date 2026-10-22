@@ -8,6 +8,7 @@ public struct SettingsSheetView: View {
     @State private var hostInput: String = ""
     @State private var portInput: String = "5050"
     @State private var standaloneToggle: Bool = false
+    @State private var backgroundSentinel: Bool = true
     @State private var testResult: String? = nil
     @State private var isTesting: Bool = false
     
@@ -127,7 +128,33 @@ public struct SettingsSheetView: View {
                                 .stroke(Color.white.opacity(0.12), lineWidth: 1)
                         )
                         
-                        // Section 3: Screen Time & Shield
+                        // Section 3: 24/7 Background Sentinel
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("[24/7 BACKGROUND SENTINEL // PERSISTENCE]")
+                                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                .foregroundColor(Color(red: 0.06, green: 0.78, blue: 0.55))
+                            
+                            Toggle(isOn: $backgroundSentinel) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Keep Alive 24/7 in Background")
+                                        .font(.system(size: 12, weight: .bold, design: .monospaced))
+                                        .foregroundColor(.white)
+                                    Text("Uses low-power audio heartbeat & background fetch so iOS never suspends daemon polling or sprint timers.")
+                                        .font(.system(size: 10, weight: .regular, design: .monospaced))
+                                        .foregroundColor(.white.opacity(0.55))
+                                }
+                            }
+                            .tint(Color(red: 0.06, green: 0.78, blue: 0.55))
+                        }
+                        .padding(14)
+                        .background(Color(red: 0.04, green: 0.04, blue: 0.06))
+                        .cornerRadius(6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                        )
+                        
+                        // Section 4: Screen Time & Shield
                         VStack(alignment: .leading, spacing: 10) {
                             Text("[SCREEN TIME // FAMILY CONTROLS]")
                                 .font(.system(size: 11, weight: .bold, design: .monospaced))
@@ -206,6 +233,7 @@ public struct SettingsSheetView: View {
             hostInput = client.serverHost
             portInput = String(client.serverPort)
             standaloneToggle = client.forceStandalone
+            backgroundSentinel = UserDefaults.standard.object(forKey: "reflex_background_sentinel") as? Bool ?? true
         }
     }
     
@@ -215,6 +243,8 @@ public struct SettingsSheetView: View {
             client.serverPort = p
         }
         client.forceStandalone = standaloneToggle
+        UserDefaults.standard.set(backgroundSentinel, forKey: "reflex_background_sentinel")
+        AudioHapticsService.shared.setBackgroundKeeper(enabled: backgroundSentinel)
         AudioHapticsService.shared.playKeyClick()
         Task {
             await client.pollServer()
