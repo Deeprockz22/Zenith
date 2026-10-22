@@ -49,6 +49,9 @@ public final class ReflexClient: ObservableObject {
     
     private var timer: AnyCancellable?
     private let session: URLSession
+    private var isBackgrounded: Bool = false
+    private var consecutiveFailures: Int = 0
+    private var currentInterval: TimeInterval = 3.0
     
     public init() {
         let savedHost = UserDefaults.standard.string(forKey: "reflex_server_host") ?? "127.0.0.1"
@@ -67,17 +70,21 @@ public final class ReflexClient: ObservableObject {
         // Load initial local state
         loadLocalState()
         
+        // Configure adaptive power-saving lifecycle observers
+        setupLifecycleObservers()
+        
         // Start polling
-        startPolling()
+        startPolling(interval: 3.0)
     }
     
     public var baseURLString: String {
         "http://\(serverHost):\(serverPort)"
     }
     
-    public func startPolling() {
+    public func startPolling(interval: TimeInterval = 3.0) {
+        currentInterval = interval
         timer?.cancel()
-        timer = Timer.publish(every: 3.0, on: .main, in: .common)
+        timer = Timer.publish(every: interval, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 Task { [weak self] in
@@ -87,6 +94,31 @@ public final class ReflexClient: ObservableObject {
         Task {
             await pollServer()
         }
+    }
+    
+    private func setupLifecycleObservers() {
+        #if canImport(UIKit)
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.isBackgrounded = true
+            // Save battery: throttle from 3s to 30s in background
+            self?.startPolling(interval: 30.0)
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.isBackgrounded = false
+            self?.consecutiveFailures = 0
+            // Instant response: resume 3s polling in foreground
+            self?.startPolling(interval: 3.0)
+        }
+        #endif
     }
     
     public func stopPolling() {
@@ -123,6 +155,7 @@ public final class ReflexClient: ObservableObject {
             self.state = .connected
             self.lastSyncTime = Date()
             self.errorMessage = nil
+            self.consecutiveFailures = 0
             
             // Also fetch profiles list if empty
             if self.allProfiles.isEmpty {
@@ -215,11 +248,17 @@ public final class ReflexClient: ObservableObject {
     }
     
     private func handleOfflineFallback(_ reason: String) {
+        consecutiveFailures += 1
         if state == .connected {
             // Just disconnected
             self.errorMessage = reason
         }
         self.state = .offlineStandalone
+        
+        // Adaptive power saving: if device is in pocket and server is unreachable, back off to 60s
+        if isBackgrounded && consecutiveFailures >= 2 && currentInterval < 60.0 {
+            startPolling(interval: 60.0)
+        }
     }
     
     private func loadLocalState() {
