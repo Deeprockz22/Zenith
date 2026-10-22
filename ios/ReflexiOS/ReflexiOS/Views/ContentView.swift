@@ -18,7 +18,7 @@ public struct ContentView: View {
                 VStack(spacing: 24) {
                     Text("+")
                     Text("01")
-                    Text("RX")
+                    Text("ZN")
                     Text("432")
                     Spacer()
                     Text("SYS")
@@ -99,7 +99,7 @@ public struct ContentView: View {
                         systemDiagnosticsStrip
                         
                         // Footer
-                        Text("[REFLEX PROTOCOL // AUTONOMOUS FOCUS STUDIO // BUILD 2.4]")
+                        Text("[ZENITH PROTOCOL // AUTONOMOUS FOCUS STUDIO // BUILD 2.4]")
                             .font(.system(size: 8, weight: .bold, design: .monospaced))
                             .foregroundColor(.white.opacity(0.25))
                             .frame(maxWidth: .infinity, alignment: .center)
@@ -126,7 +126,7 @@ public struct ContentView: View {
                     .fill(client.state == .connected ? Color(red: 0.06, green: 0.78, blue: 0.55) : Color(red: 0.95, green: 0.65, blue: 0.2))
                     .frame(width: 7, height: 7)
                 
-                Text("REFLEX // iOS")
+                Text("ZENITH // iOS")
                     .font(.system(size: 13, weight: .bold, design: .monospaced))
                     .foregroundColor(.white)
             }
@@ -202,7 +202,7 @@ public struct ContentView: View {
     
     private var heroBanner: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("REFLEX ATTENTION ENGINE")
+            Text("ZENITH ATTENTION ENGINE")
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                 .foregroundColor(Color(red: 0.06, green: 0.78, blue: 0.55))
             

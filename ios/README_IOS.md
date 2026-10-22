@@ -1,16 +1,16 @@
-# REFLEX iOS // PERSONAL SIDELOADING GUIDE
+# ZENITH iOS // PERSONAL SIDELOADING GUIDE
 ```
-   ____  _____ _____ _     _______  __     _ ____  ____  
-  |  _ \| ____|  ___| |   | ____\ \/ /    (_)  _ \/ ___| 
-  | |_) |  _| | |_  | |   |  _|  \  /     | | | | \___ \ 
-  |  _ <| |___|  _| | |___| |___ /  \     | | |_| |___) |
-  |_| \_\_____|_|   |_____|_____/_/\_\    |_|____/|____/ 
+   ______ _____ _   _ _____ _____ _   _     _ ____  ____  
+  |___  /| ____| \ | |_   _|_   _| | | |   (_)  _ \/ ___| 
+     / / |  _| |  \| | | |   | | | |_| |   | | | | \___ \ 
+    / /__| |___| |\  | | |   | | |  _  |   | | |_| |___) |
+   /_____|_____|_| \_| |_|   |_| |_| |_|   |_|____/|____/ 
   
   [HARDWARE-ACCELERATED DUAL SHIELD // MAC + iOS PARALLEL]
   [AESTHETIC: ASCII-MAGIC.COM // 432Hz HARMONIC STUDIO]
 ```
 
-This iOS edition of **Reflex** is specifically architected for **personal sideloading** without going through the Apple App Store. You retain 100% data sovereignty, zero telemetry tracking, and zero recurring fees.
+This iOS edition of **Zenith** is specifically architected for **personal sideloading** without going through the Apple App Store. You retain 100% data sovereignty, zero telemetry tracking, and zero recurring fees.
 
 ---
 

@@ -75,7 +75,7 @@ open_dashboard() {
 profile() {
     if [ -z "$2" ]; then
         echo "══════════════════════════════════════════════════════════════════"
-        echo "🧠 REFLEX-MAC FOCUS PERSONAS & PROFILES"
+        echo "🧠 ZENITH FOCUS PERSONAS & PROFILES"
         echo "══════════════════════════════════════════════════════════════════"
         python3 -c "
 import urllib.request, json
