@@ -28,3 +28,10 @@ entertainment_quota.json
 ._*
 .Spotlight-V100
 .Trashes
+
+# Swift & Xcode
+.build/
+*.xcuserdata/
+*.xcscmblueprint
+DerivedData/
+
