@@ -23,51 +23,71 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "rag_memory.sqlite")
 # --- INITIAL SEED KNOWLEDGE BASES ---
 
 DEFAULT_CREATORS = [
-    # Academic & Science
-    {"name": "3Blue1Brown", "aliases": ["3blue1brown", "grant sanderson"], "category": "mathematics", "type": "lecture", "trust": 1.0, "notes": "Essence of Linear Algebra, Calculus, Neural Networks"},
-    {"name": "MIT OpenCourseWare", "aliases": ["mit opencourseware", "mit 18.06", "mit 6.006", "mit ocw"], "category": "academic", "type": "lecture", "trust": 1.0, "notes": "Official MIT University Lectures"},
-    {"name": "Stanford Online", "aliases": ["stanford online", "cs229", "cs231n", "stanford university"], "category": "academic", "type": "lecture", "trust": 1.0, "notes": "Official Stanford Engineering Courses"},
-    {"name": "Harvard University", "aliases": ["harvard university", "cs50", "harvard cs50"], "category": "academic", "type": "lecture", "trust": 1.0, "notes": "Computer Science & College Lectures"},
-    {"name": "Veritasium", "aliases": ["veritasium", "derek muller"], "category": "physics_science", "type": "lecture", "trust": 0.95, "notes": "In-depth physics, engineering, and scientific investigation"},
-    {"name": "Computerphile", "aliases": ["computerphile", "brady haran"], "category": "computer_science", "type": "lecture", "trust": 0.98, "notes": "University of Nottingham CS professors explaining algorithms & security"},
-    {"name": "Numberphile", "aliases": ["numberphile"], "category": "mathematics", "type": "lecture", "trust": 0.98, "notes": "Deep mathematical theory and proofs"},
-    {"name": "Two Minute Papers", "aliases": ["two minute papers", "kÃ¡roly zsolnai-fehÃ©r"], "category": "ai_research", "type": "lecture", "trust": 0.95, "notes": "AI, graphics, and computer vision paper breakdowns"},
-    {"name": "Yannic Kilcher", "aliases": ["yannic kilcher"], "category": "ai_research", "type": "lecture", "trust": 0.98, "notes": "Full academic ML paper readings and architecture reviews"},
+    # Aerospace, CFD & Scientific Machine Learning
+    {"name": "Steve Brunton", "aliases": ["steve brunton", "kutz", "data-driven science"], "category": "engineering_cfd", "type": "lecture", "trust": 1.0, "notes": "Data-driven dynamical systems, SVD, PINNs, and fluid mechanics"},
+    {"name": "Fluid Toolbox", "aliases": ["fluid toolbox", "aidan wimshurst", "cfd ninja"], "category": "engineering_cfd", "type": "lecture", "trust": 0.98, "notes": "Practical aerodynamics, CFD meshing, compressible flow, and OpenFOAM"},
+    {"name": "Jozsef Nagy", "aliases": ["jozsef nagy", "openfoam tutorial"], "category": "engineering_cfd", "type": "lecture", "trust": 0.98, "notes": "OpenFOAM CFD simulation, boundary layers, and turbulence modeling"},
+    {"name": "NPTEL Aerospace Engineering", "aliases": ["nptel aerospace", "nptel fluid", "nptel cfd"], "category": "academic", "type": "lecture", "trust": 1.0, "notes": "University graduate lectures in aerodynamics, gas dynamics, and propulsion"},
+    {"name": "AIAA Aviation & SciTech", "aliases": ["aiaa", "scitech", "aiaa aviation", "aiaa journal"], "category": "academic", "type": "lecture", "trust": 1.0, "notes": "AIAA aerospace technical conferences, flight mechanics, and papers"},
+    {"name": "3Blue1Brown", "aliases": ["3blue1brown", "grant sanderson"], "category": "mathematics", "type": "lecture", "trust": 1.0, "notes": "Essence of Linear Algebra, Calculus, Neural Networks, Differential Equations"},
+    {"name": "MIT OpenCourseWare", "aliases": ["mit opencourseware", "mit 18.06", "mit 16.00", "mit ocw"], "category": "academic", "type": "lecture", "trust": 1.0, "notes": "MIT Aerodynamics, Fluid Dynamics, and Applied Mathematics"},
+    {"name": "Stanford Online", "aliases": ["stanford online", "aa210", "cs229", "stanford engineering"], "category": "academic", "type": "lecture", "trust": 1.0, "notes": "Stanford Aeronautics & Astronautics and Machine Learning Courses"},
+    {"name": "Two Minute Papers", "aliases": ["two minute papers", "kÃ¡roly zsolnai-fehÃ©r"], "category": "ai_research", "type": "lecture", "trust": 0.95, "notes": "AI, physics simulation, neural operators, and computational fluids"},
     {"name": "StatQuest with Josh Starmer", "aliases": ["statquest", "josh starmer"], "category": "statistics_ml", "type": "lecture", "trust": 0.98, "notes": "Statistics, Neural Networks, PCA, Machine Learning"},
-    {"name": "CrashCourse", "aliases": ["crash course", "crashcourse"], "category": "education", "type": "lecture", "trust": 0.92, "notes": "Curriculum-aligned educational deep dives"},
-    {"name": "Steve Brunton", "aliases": ["steve brunton", "kutz"], "category": "engineering_cfd", "type": "lecture", "trust": 1.0, "notes": "Data-driven dynamical systems, SVD, PINNs, and fluid mechanics"},
+    {"name": "Andrej Karpathy", "aliases": ["andrej karpathy", "karpathy"], "category": "ai_research", "type": "lecture", "trust": 1.0, "notes": "Neural networks, backprop, and deep learning architectures from scratch"},
+    {"name": "Yannic Kilcher", "aliases": ["yannic kilcher"], "category": "ai_research", "type": "lecture", "trust": 0.98, "notes": "Academic ML paper readings and neural architecture reviews"},
+    {"name": "Veritasium", "aliases": ["veritasium", "derek muller"], "category": "physics_science", "type": "lecture", "trust": 0.95, "notes": "In-depth physics, fluid dynamics experiments, and engineering"},
+    {"name": "Computerphile", "aliases": ["computerphile", "brady haran"], "category": "computer_science", "type": "lecture", "trust": 0.98, "notes": "Algorithms, floating-point arithmetic, and high-performance computing"},
     
-    # Software Engineering & Systems
-    {"name": "ThePrimeagen", "aliases": ["theprimeagen", "primeagen"], "category": "programming", "type": "lecture", "trust": 0.90, "notes": "Vim, Rust, Go, Software Architecture and performance"},
-    {"name": "Fireship", "aliases": ["fireship", "fireship.io"], "category": "programming", "type": "lecture", "trust": 0.88, "notes": "High-density technical summaries and language overviews"},
-    {"name": "Tsoding Daily", "aliases": ["tsoding", "tsoding daily", "alexey kutepov"], "category": "programming", "type": "lecture", "trust": 0.95, "notes": "Systems programming from scratch in C, Odin, and Assembly"},
-    {"name": "George Hotz Archive", "aliases": ["george hotz", "geohot", "tinygrad"], "category": "systems_ai", "type": "lecture", "trust": 0.92, "notes": "Deep learning framework development from scratch"},
-    {"name": "Jon Gjengset", "aliases": ["jon gjengset", "crust of rust"], "category": "programming", "type": "lecture", "trust": 0.99, "notes": "Deep-dive systems programming and async Rust internals"},
-
-    # High-Signal Podcasts & Long-form Interviews
-    {"name": "Lex Fridman Podcast", "aliases": ["lex fridman", "fridman podcast"], "category": "podcast", "type": "podcast", "trust": 0.96, "notes": "3+ hour technical, scientific, and philosophical conversations"},
-    {"name": "Dwarkesh Patel", "aliases": ["dwarkesh patel", "dwarkesh podcast"], "category": "podcast", "type": "podcast", "trust": 0.98, "notes": "High-intellect interviews on AI, history, geopolitics, and chip fabrication"},
-    {"name": "Huberman Lab", "aliases": ["huberman lab", "andrew huberman"], "category": "neuroscience", "type": "podcast", "trust": 0.94, "notes": "Stanford neuroscience, focus, physiology and cognitive performance"},
-    {"name": "Acquired Podcast", "aliases": ["acquired podcast", "acquired fm", "ben gilbert", "david rosenthal"], "category": "business_history", "type": "podcast", "trust": 0.98, "notes": "4-hour definitive histories of tech giants (Nvidia, Apple, TSMC, Microsoft)"},
-    {"name": "Hardcore History", "aliases": ["hardcore history", "dan carlin"], "category": "history", "type": "podcast", "trust": 0.98, "notes": "Epic multi-part documentary audiobooks and historical analysis"},
-    {"name": "All-In Podcast", "aliases": ["all-in podcast", "all-in chamath", "all-in saks"], "category": "macroeconomics", "type": "podcast", "trust": 0.88, "notes": "Macroeconomics, technology, politics and venture capital"},
-    {"name": "Sean Carroll's Mindscape", "aliases": ["mindscape podcast", "sean carroll"], "category": "physics_philosophy", "type": "podcast", "trust": 0.97, "notes": "Theoretical physics, quantum mechanics, and philosophical deep dives"}
+    # High-Signal Podcasts & Long-form Scientific Interviews
+    {"name": "Lex Fridman Podcast", "aliases": ["lex fridman", "fridman podcast"], "category": "podcast", "type": "podcast", "trust": 0.96, "notes": "Technical, aerospace, physics, and AI deep-dive conversations"},
+    {"name": "Dwarkesh Patel", "aliases": ["dwarkesh patel", "dwarkesh podcast"], "category": "podcast", "type": "podcast", "trust": 0.98, "notes": "High-intellect interviews on AI, physics, semiconductors, and deep tech"},
+    {"name": "Sean Carroll's Mindscape", "aliases": ["mindscape podcast", "sean carroll"], "category": "physics_philosophy", "type": "podcast", "trust": 0.97, "notes": "Theoretical physics, fluid dynamics, and dynamical systems"},
+    {"name": "Huberman Lab", "aliases": ["huberman lab", "andrew huberman"], "category": "neuroscience", "type": "podcast", "trust": 0.94, "notes": "Stanford neuroscience, focus, physiology, and cognitive performance"},
+    {"name": "Acquired Podcast", "aliases": ["acquired podcast", "acquired fm"], "category": "business_history", "type": "podcast", "trust": 0.98, "notes": "Definitive technical histories of aerospace and computing giants"}
 ]
 
 DEFAULT_GOALS = [
-    {"topic": "Machine Learning & Data-Driven Modelling", "keywords": ["machine learning", "neural network", "transformer", "pinns", "svd", "loss function", "gradient descent", "backprop", "deep learning", "pytorch"], "category": "academic"},
-    {"topic": "Physics-Informed Neural Networks (PINNs) & CFD", "keywords": ["physics-informed", "pinn", "navier-stokes", "fluid dynamics", "cfd", "mesh", "differential equations", "partial differential", "finite element"], "category": "academic"},
-    {"topic": "Systems Programming in Rust & C++", "keywords": ["rust", "cargo", "borrow checker", "c++", "memory safety", "concurrency", "low level", "kernel", "compilers", "operating system"], "category": "developer"},
-    {"topic": "Academic Research & Thesis Paper Writing", "keywords": ["arxiv", "paper", "overleaf", "latex", "citations", "scholar", "abstract", "literature review", "methodology", "bibtex"], "category": "academic"},
-    {"topic": "Startup Architecture, MVP & Product Strategy", "keywords": ["startup", "mvp", "product design", "saas", "pricing", "go to market", "linear", "system architecture", "stripe"], "category": "founder"},
-    {"topic": "Cognitive Focus & Neuroscience", "keywords": ["dopamine", "deep work", "cognitive performance", "focus", "neuroscience", "sleep", "circadian", "pomodoro"], "category": "general"}
+    {
+        "topic": "Aerodynamics & Computational Fluid Dynamics (CFD)",
+        "keywords": ["aerodynamics", "cfd", "navier-stokes", "compressible", "boundary layer", "rans", "les", "mesh", "openfoam", "airfoil", "turbulent", "supersonic", "mach", "reynolds", "finite volume", "snappyhexminesh"],
+        "category": "academic"
+    },
+    {
+        "topic": "Physics-Informed Neural Networks (PINNs) & SciML",
+        "keywords": ["physics-informed", "pinn", "sciml", "deepxde", "operator learning", "fno", "deeponet", "loss function", "autograd", "residual", "automatic differentiation", "neural operator"],
+        "category": "academic"
+    },
+    {
+        "topic": "Modal Decomposition, POD & Reduced Order Models (ROMs)",
+        "keywords": ["proper orthogonal decomposition", "pod", "svd", "dmd", "dynamic mode decomposition", "reduced order model", "rom", "sindy", "brunton", "coherent structures", "singular value decomposition"],
+        "category": "academic"
+    },
+    {
+        "topic": "Turbulence Modeling & Data-Driven Closures (RANS/LES)",
+        "keywords": ["turbulence", "reynolds stress", "boussinesq", "closure", "dns", "k-omega", "les", "subgrid-scale", "shear stress", "eddy viscosity", "anisotropy"],
+        "category": "academic"
+    },
+    {
+        "topic": "Aerospace Propulsion & Compressible Gas Dynamics",
+        "keywords": ["propulsion", "gas turbine", "nozzle", "combustion", "rocketry", "thrust", "hypersonic", "shock wave", "flight mechanics", "compressor", "isentropic"],
+        "category": "developer"
+    },
+    {
+        "topic": "Aerospace Graduate Research & Journal Papers (AIAA/JFM)",
+        "keywords": ["thesis", "jfm", "journal of fluid mechanics", "aiaa", "physics of fluids", "paper", "arxiv", "overleaf", "latex", "citations", "literature review", "methodology"],
+        "category": "academic"
+    }
 ]
 
 DEFAULT_EXEMPLARS = [
-    {"title": "MIT 18.06 Linear Algebra, Spring 2005 - Gilbert Strang", "domain": "youtube.com", "action": "ALLOW", "reason": "Accredited University Course Lecture", "profile": "academic"},
-    {"title": "Lex Fridman Podcast #400 - Jeff Bezos", "domain": "youtube.com", "action": "ALLOW", "reason": "Long-form Intellectual Conversation", "profile": "general"},
-    {"title": "Crust of Rust: Dispatch and Fat Pointers - Jon Gjengset", "domain": "youtube.com", "action": "ALLOW", "reason": "Advanced Systems Programming Deep Dive", "profile": "developer"},
     {"title": "Steve Brunton: Physics Informed Neural Networks (PINNs)", "domain": "youtube.com", "action": "ALLOW", "reason": "Engineering Research & Mathematical Physics", "profile": "academic"},
+    {"title": "MIT 18.06 Linear Algebra, Spring 2005 - Gilbert Strang", "domain": "youtube.com", "action": "ALLOW", "reason": "Accredited University Course Lecture", "profile": "academic"},
+    {"title": "Fluid Toolbox: How to Mesh Transonic Airfoils with SnappyHexMesh", "domain": "youtube.com", "action": "ALLOW", "reason": "Aerospace CFD Meshing Tutorial", "profile": "developer"},
+    {"title": "Jozsef Nagy: OpenFOAM Turbulence Modeling and k-omega SST", "domain": "youtube.com", "action": "ALLOW", "reason": "CFD Numerical Simulation Lecture", "profile": "developer"},
+    {"title": "AIAA SciTech: Fourier Neural Operators for Transonic Aerodynamic Surrogates", "domain": "youtube.com", "action": "ALLOW", "reason": "Aerospace Machine Learning Conference", "profile": "academic"},
+    {"title": "DeepXDE Tutorial: Solving 2D Navier-Stokes Equations with PINNs", "domain": "youtube.com", "action": "ALLOW", "reason": "Scientific Machine Learning Deep Dive", "profile": "academic"},
+    {"title": "Lex Fridman Podcast #400 - Jeff Bezos on Space and Rockets", "domain": "youtube.com", "action": "ALLOW", "reason": "Aerospace & Engineering Conversation", "profile": "general"},
     {"title": "Dwarkesh Patel: Demis Hassabis on Gemini, AlphaFold, and AGI", "domain": "youtube.com", "action": "ALLOW", "reason": "AI Research Leadership & Scientific Interview", "profile": "academic"},
     {"title": "Try Not To Laugh Challenge Compilation #42", "domain": "youtube.com", "action": "REDIRECT", "reason": "Casual Entertainment / Dopamine Trap", "profile": "general"},
     {"title": "I Spent 24 Hours in a Secret Underground Bunker", "domain": "youtube.com", "action": "REDIRECT", "reason": "High-dopamine Clickbait Entertainment", "profile": "general"},
@@ -368,6 +388,29 @@ class LocalRAGService:
                 conn.commit()
         self._build_in_memory_index()
         return {"status": "ok"}
+
+    def reset_to_aerospace_seeds(self):
+        """Re-seeds goals and creators specifically for Aerospace & CFD / SciML."""
+        with self._lock:
+            with sqlite3.connect(DB_PATH) as conn:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM user_goals")
+                now = time.time()
+                for g in DEFAULT_GOALS:
+                    cursor.execute("""
+                        INSERT INTO user_goals (topic, keywords_json, category, created_at)
+                        VALUES (?, ?, ?, ?)
+                    """, (g["topic"], json.dumps(g["keywords"]), g["category"], now))
+
+                cursor.execute("DELETE FROM creators_kb")
+                for c in DEFAULT_CREATORS:
+                    cursor.execute("""
+                        INSERT INTO creators_kb (name, aliases_json, category, type, trust, notes, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (c["name"], json.dumps(c["aliases"]), c["category"], c["type"], c["trust"], c["notes"], now))
+                conn.commit()
+        self._build_in_memory_index()
+        return {"status": "ok", "goals_count": len(self.goals), "creators_count": len(self.creators)}
 
     def get_stats(self):
         """Returns statistics for dashboard telemetry."""

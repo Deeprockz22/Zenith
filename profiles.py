@@ -9,63 +9,67 @@ Creators & Writers, Balanced Knowledge Workers, and Strict Zen Monk Mode.
 PROFILES = {
     "developer": {
         "id": "developer",
-        "name": "Software Engineer",
-        "badge": "[DEV]",
-        "tagline": "CODE // REPOS // RFCs // ARCHITECTURE",
-        "description": "Tailored for software engineers, DevOps, and systems programmers.",
+        "name": "Aerospace & CFD Engineer",
+        "badge": "[AERO_ENG]",
+        "tagline": "CFD // AERODYNAMICS // NAVIER_STOKES // MESHING // OPENFOAM",
+        "description": "Tailored for Aerospace engineers, aerodynamicists, and CFD numerical simulation practitioners.",
         "productive_domains": {
-            "github.com", "gitlab.com", "stackoverflow.com", "linear.app",
-            "developer.apple.com", "docs.python.org", "rust-lang.org", "pkg.go.dev",
-            "news.ycombinator.com", "devdocs.io", "chatgpt.com", "claude.ai",
-            "cursor.com", "docker.com", "kubernetes.io", "huggingface.co",
-            "leetcode.com", "jira.atlassian.com"
+            "cfd-online.com", "openfoam.com", "openfoam.org", "github.com",
+            "su2code.github.io", "paraview.org", "ansys.com", "simscale.com",
+            "siemens.com", "scipy.org", "numpy.org", "pytorch.org",
+            "overleaf.com", "arxiv.org", "claude.ai", "chatgpt.com", "notion.so"
         },
         "allowed_keywords": [
-            "coding", "tutorial", "architecture", "debugging", "system design", "golang",
-            "rust", "python", "typescript", "react", "docker", "kubernetes", "linux", "kernel",
-            "compiler", "database", "sql", "nosql", "algorithm", "leetcode", "benchmark",
-            "keynote", "talks at google", "strange loop", "cppcon", "wwdc", "deep dive",
-            "computerphile", "numberphile", "devops", "cloud", "aws", "gcp"
+            "aerodynamics", "cfd", "navier-stokes", "compressible flow", "incompressible",
+            "boundary layer", "transonic", "supersonic", "hypersonic", "airfoil", "naca",
+            "turbulence", "rans", "les", "dns", "k-omega", "k-epsilon", "reynolds number",
+            "mach number", "vortex shedding", "lift", "drag", "shock wave", "finite volume",
+            "fvm", "openfoam", "snappyhexminesh", "gmsh", "paraview", "fluent", "star-ccm",
+            "su2", "propulsion", "gas turbine", "nozzle", "combustion", "rocketry",
+            "computational fluid dynamics", "mesh generation", "aerospace engineering",
+            "flight mechanics", "aeroacoustics", "fluid dynamics"
         ],
         "allowed_types": ["podcast", "lecture"],
         "portals": [
-            {"key": "1", "name": "GITHUB", "url": "https://github.com", "tag": "github.com"},
-            {"key": "2", "name": "STACK_OVERFLOW", "url": "https://stackoverflow.com", "tag": "stackoverflow.com"},
-            {"key": "3", "name": "DEV_DOCS", "url": "https://devdocs.io", "tag": "devdocs.io"},
-            {"key": "4", "name": "LINEAR", "url": "https://linear.app", "tag": "linear.app"},
-            {"key": "5", "name": "CLAUDE", "url": "https://claude.ai", "tag": "claude.ai"},
-            {"key": "6", "name": "CHATGPT", "url": "https://chatgpt.com", "tag": "chatgpt.com"}
+            {"key": "1", "name": "CFD_ONLINE", "url": "https://www.cfd-online.com", "tag": "cfd-online.com"},
+            {"key": "2", "name": "OPENFOAM", "url": "https://www.openfoam.com", "tag": "openfoam.com"},
+            {"key": "3", "name": "SU2_CFD", "url": "https://su2code.github.io", "tag": "su2code.github.io"},
+            {"key": "4", "name": "PARAVIEW", "url": "https://www.paraview.org", "tag": "paraview.org"},
+            {"key": "5", "name": "ARXIV_FLUIDS", "url": "https://arxiv.org/list/physics.flu-dyn/recent", "tag": "arxiv.org"},
+            {"key": "6", "name": "CLAUDE", "url": "https://claude.ai", "tag": "claude.ai"}
         ]
     },
 
     "academic": {
         "id": "academic",
-        "name": "Student & Scholar",
-        "badge": "[STUDENT]",
-        "tagline": "COURSES // STUDY // RESEARCH // ASSIGNMENTS",
-        "description": "Tailored for students, university scholars, and academic researchers worldwide.",
+        "name": "Aerospace Scholar & SciML",
+        "badge": "[AERO_GRAD]",
+        "tagline": "FLUID_MECHANICS // SciML // PINNs // THESIS // AIAA_JFM",
+        "description": "Tailored for Aerospace graduate scholars researching fluid dynamics, PINNs, and Scientific Machine Learning.",
         "productive_domains": {
-            "canvas.instructure.com", "instructure.com", "canvaslms.com", "sso.canvaslms.com",
-            "classroom.google.com", "blackboard.com", "moodle.org", "moodle.com",
-            "quizlet.com", "coursera.org", "edx.org", "khanacademy.org",
-            "overleaf.com", "arxiv.org", "scholar.google.com", "nature.com", "science.org",
-            "sciencedirect.com", "jstor.org", "researchgate.net", "semanticscholar.org",
-            "notion.so", "chatgpt.com", "claude.ai", "docs.google.com", "github.com"
+            "arxiv.org", "scholar.google.com", "sciencedirect.com", "arc.aiaa.org",
+            "cambridge.org", "aip.scitation.org", "overleaf.com", "researchgate.net",
+            "semanticscholar.org", "deepxde.readthedocs.io", "github.com",
+            "notion.so", "chatgpt.com", "claude.ai", "docs.google.com", "nature.com"
         },
         "allowed_keywords": [
-            "lecture", "mit", "stanford", "cs50", "lecture notes", "symposium", "dissertation",
-            "physics", "mathematics", "biology", "mechanics", "cfd", "neural network", "paper review",
-            "deep dive", "documentary", "huberman lab", "lex fridman", "mindscape", "veritasium",
-            "3blue1brown", "computerphile", "numberphile", "audiobook", "thesis", "coursework",
-            "study", "homework", "exam", "syllabus", "tutorial", "academic", "university", "assignment"
+            "physics-informed neural networks", "pinn", "scientific machine learning", "sciml",
+            "deepxde", "fourier neural operator", "fno", "deeponet", "operator learning",
+            "svd", "proper orthogonal decomposition", "pod", "dynamic mode decomposition", "dmd",
+            "reduced order model", "rom", "sindy", "brunton", "kutz", "karniadakis",
+            "navier-stokes", "fluid mechanics", "journal of fluid mechanics", "jfm", "aiaa",
+            "physics of fluids", "thesis", "aerospace", "boundary layer stability",
+            "turbulence modeling", "surrogate model", "aerodynamic optimization",
+            "direct numerical simulation", "scientific computing", "numerical methods",
+            "mit", "stanford", "lecture", "symposium", "paper review", "overleaf", "latex"
         ],
         "allowed_types": ["podcast", "lecture"],
         "portals": [
-            {"key": "1", "name": "CANVAS LMS", "url": "https://canvas.instructure.com", "tag": "instructure.com"},
+            {"key": "1", "name": "ARXIV_AERO", "url": "https://arxiv.org/list/physics.flu-dyn/recent", "tag": "arxiv.org"},
             {"key": "2", "name": "GOOGLE SCHOLAR", "url": "https://scholar.google.com", "tag": "scholar.google.com"},
-            {"key": "3", "name": "OVERLEAF", "url": "https://overleaf.com", "tag": "overleaf.com"},
-            {"key": "4", "name": "ARXIV", "url": "https://arxiv.org", "tag": "arxiv.org"},
-            {"key": "5", "name": "NOTION", "url": "https://notion.so", "tag": "notion.so"},
+            {"key": "3", "name": "OVERLEAF_THESIS", "url": "https://overleaf.com", "tag": "overleaf.com"},
+            {"key": "4", "name": "AIAA_ARC", "url": "https://arc.aiaa.org", "tag": "arc.aiaa.org"},
+            {"key": "5", "name": "DEEPXDE_DOCS", "url": "https://deepxde.readthedocs.io", "tag": "deepxde.readthedocs.io"},
             {"key": "6", "name": "CLAUDE", "url": "https://claude.ai", "tag": "claude.ai"}
         ]
     },
@@ -177,12 +181,14 @@ PROFILES = {
     }
 }
 
-DEFAULT_PROFILE_ID = "general"
+DEFAULT_PROFILE_ID = "academic"
 
 def get_profile(profile_id=None):
-    """Returns profile dictionary by ID, falling back to general."""
-    if profile_id == "student":
+    """Returns profile dictionary by ID, falling back to academic (Aerospace Scholar & SciML)."""
+    if profile_id in ("student", "aero_grad", "sciml", "scholar"):
         profile_id = "academic"
+    elif profile_id in ("developer", "aero", "cfd", "aero_eng", "engineer"):
+        profile_id = "developer"
     if not profile_id or profile_id not in PROFILES:
         return PROFILES[DEFAULT_PROFILE_ID]
     return PROFILES[profile_id]
