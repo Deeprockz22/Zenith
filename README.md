@@ -1,7 +1,22 @@
-# Reflex · 🧠🌿
+# Zenith
 
-> **Sub-50ms neural decision layer and mindful focus sanctuary for macOS.**  
-> Intercepting impulsive browsing reflexes before dopamine loops take over.
+```text
+                 .                 .
+             .       .         .       .
+          .      .      .   .      .      .
+        .    .       .       .       .    .
+       .       .   .    _    .   .       .
+        .       .    / / \ \    .       .
+          .      .  / /___\ \  .      .
+             .     /  _____  \     .
+                   /_/     \_\
+
+              Z E N I T H
+        a quieter route back to the work
+```
+
+> A local macOS tool that notices when browsing is drifting away from your
+> work and gives you a deliberate way to return.
 
 [![macOS](https://img.shields.io/badge/platform-macOS%20Apple%20Silicon-black?logo=apple)](https://apple.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -10,32 +25,36 @@
 
 ---
 
-## The Philosophy
+## What it does
 
-When you get fatigued or hit a wall while working, your brain's **System 1** (instinctive, automatic impulse) takes over: you unconsciously open a new tab and type `youtube.com`, `instagram.com`, `x.com`, or `netflix.com`.
+Zenith is for the moment when a short break quietly turns into another hour online.
+It watches the active browser tab, looks at the page title and URL, and uses your
+recent browsing context to decide whether the tab looks useful or distracting.
 
-Standard website blockers are dumb: they block everything blindly with harsh 403 error pages, breaking educational research (e.g. blocking an MIT Linear Algebra lecture because it happens to be hosted on YouTube).
+It is not a blanket website blocker. An educational video on YouTube can still
+be allowed, while a Shorts feed, a trending page, or an entertainment binge can
+be redirected to a calm focus screen. The decision is local, the dashboard is
+served locally, and the user can choose the active focus profile.
 
-**Reflex replaces blind domain blocking with a 3-tier cognitive safety net:**
-1. **Reads Active Context**: Evaluates the page title, URL path, and your recent browsing trajectory.
-2. **Runs a Sub-50ms Jev "System One" Neural Decision**: Using a local 500M foundation model running on Apple Silicon Metal Performance Shaders (MPS), Reflex makes a typed decision (`Intent`: `study_or_work` vs. `casual_entertainment`).
-3. **Offers a Quiet Sanctuary**: Instead of an aggressive error, Reflex guides your tab to a tranquil, tactile pause screen complete with an 8-second breathing circle, live telemetry, and an acoustic 432Hz Tibetan singing bowl synthesis.
+The normal mode uses lightweight rules and local retrieval. An optional Jev
+worker can provide deeper classification for ambiguous pages, but it runs in a
+separate process so the everyday watcher stays small.
 
 ```text
        Impulsive Tab Opened (e.g. YouTube / Reddit / Netflix)
-                                │
-                                ▼
-         [Tier 1: Fast Whitelist] ──(GitHub / Canvas / Overleaf)──> ALLOW (<0.1ms)
-                                │
-                                ▼
+                                |
+                                v
+         [Tier 1: Fast Whitelist] --(GitHub / Canvas / Overleaf)--> ALLOW (<0.1ms)
+                                |
+                                v
          [Tier 2: Jev System One Neural Decision Layer (~47ms)]
-                                │
-          ┌─────────────────────┴─────────────────────┐
-          ▼                                           ▼
+                                |
+          +---------------------+---------------------+
+          v                                           v
    Intent: study_or_work                     Intent: entertainment
  (e.g. MIT 18.06 Lecture)                   (e.g. Trending Shorts / Ted Lasso)
-          │                                           │
-          ▼                                           ▼
+          |                                           |
+          v                                           v
         ALLOW                                  MINDFUL REDIRECT
 (Educational Exception)                      (Quiet Zone Sanctuary)
 ```
@@ -46,28 +65,28 @@ Standard website blockers are dumb: they block everything blindly with harsh 403
 
 ### Evidence-informed intervention design
 
-Reflex treats distraction support as a **just-in-time adaptive intervention**, not a permanent wall:
+Zenith treats distraction support as a **just-in-time adaptive intervention**, not a permanent wall:
 
 * Interventions use changing context (active tab, title, trajectory, profile, and quota) rather than blocking every visit.
 * The dashboard keeps control with the user through explicit profiles, goals, quotas, and reset actions.
 * Notifications are brief and limited to meaningful state changes so the intervention does not become another attention sink.
 
-These principles are informed by [Nahum-Shani & Murphy, *Just-in-Time Adaptive Interventions: Where Are We Now and What Is Next?* (2025)](https://pmc.ncbi.nlm.nih.gov/articles/PMC13217361/) and [Lukoff, Lyngs & colleagues, *Designing to Support Autonomy and Reduce Psychological Reactance in Digital Self-Control Tools* (2022)](https://ulriklyngs.com/pdfs/lukoff-lyngs-alberts-2022-dscts_for_autonomy.pdf). They are product-design references, not claims that Reflex is a clinical intervention.
+These principles are informed by [Nahum-Shani & Murphy, *Just-in-Time Adaptive Interventions: Where Are We Now and What Is Next?* (2025)](https://pmc.ncbi.nlm.nih.gov/articles/PMC13217361/) and [Lukoff, Lyngs & colleagues, *Designing to Support Autonomy and Reduce Psychological Reactance in Digital Self-Control Tools* (2022)](https://ulriklyngs.com/pdfs/lukoff-lyngs-alberts-2022-dscts_for_autonomy.pdf). They are product-design references, not claims that Zenith is a clinical intervention.
 
-### ⚡ 1. Local Jev System One Decision Engine
+### 1. Local Jev System One Decision Engine
 * Powered by `open-alternative-jev` (`so1`) running on top of **`Qwen2.5-0.5B-Instruct`**.
 * **47.5 ms average warm latency** on Apple Silicon via Metal Performance Shaders (MPS).
 * Outputs calibrated typed probabilities (`Choice`, `yes_no`) in a single forward pass without generating text.
 * Distinguishes educational study from entertainment doomscrolling based on page context.
 
-### 📊 2. Local Browser History Intelligence
+### 2. Local Browser History Intelligence
 * Natively inspects local SQLite history from **Arc**, **Google Chrome**, **Brave**, and **Microsoft Edge**.
 * Discovers your true habit loops:
   * Automatically identifies your top real-world time-sinks.
   * Maps your daily **Peak Distraction Hours** (e.g. 12:00–13:00 lunch reflex or 23:00 late night).
   * Detects **Dopamine Loops** (3+ rapid distraction switches within 15 minutes) and intervenes.
 
-### 🌿 3. Tactile Editorial Focus Sanctuary (`dashboard.html`)
+### 3. Tactile Editorial Focus Sanctuary (`dashboard.html`)
 * **Zero AI Clutter**: No neon purple mesh blobs, no floating emojis, no generic templates.
 * **Editorial Aesthetics**: Designed with **Instrument Serif**, **Plus Jakarta Sans**, and **JetBrains Mono** telemetry.
 * **Handcrafted Web Audio Synthesis**:
@@ -77,7 +96,7 @@ These principles are informed by [Nahum-Shani & Murphy, *Just-in-Time Adaptive I
 * **Grounding Breathing Guide**: 8-second organic inhale/exhale guide ring.
 * **Intentional Portals**: 1-click links to GitHub, Notion, ChatGPT, Claude, LeetCode, and study environments.
 
-### 🔄 4. Zero-Friction 24/7 macOS Daemon
+### 4. macOS Daemon
 * Runs silently in the background with near-zero CPU footprint.
 * Auto-starts on macOS boot via [`FocusRedirect.app`](FocusRedirect.app) in **Login Items**.
 * Integrated safety net in `~/.zshrc`.
@@ -167,8 +186,7 @@ uv pip install -e path/to/open-alternative-jev
 
 ### 3. Open the Sanctuary Dashboard
 
-Navigate to:
-👉 **`http://localhost:5050`**
+Navigate to **`http://localhost:5050`**.
 
 Or run:
 ```bash
