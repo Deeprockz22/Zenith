@@ -10,6 +10,7 @@ import threading
 from urllib.parse import urlparse
 from history_reader import KNOWN_ENTERTAINMENT_ROOTS, KNOWN_PRODUCTIVE_ROOTS, KNOWN_PODCAST_ROOTS
 from profiles import get_profile
+from rag_engine import get_rag
 
 # Explicit keywords for podcast & long-form intellectual discussions
 PODCAST_KEYWORDS = [
@@ -172,13 +173,60 @@ def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
             "model": "fast-whitelist"
         }
 
-    # --- TIER 2: Jev Neural Decision Model with Active Persona Injection (~47ms) ---
+    # --- TIER 1E: RAG Context Retrieval & Knowledge Engine (< 0.1ms) ---
+    rag = get_rag()
+    rag_context = rag.retrieve(url, title_clean, profile_id=profile.get("id"))
+
+    # RAG Fast-Path: Verified High-Trust Creator
+    if not is_risk and rag_context.get("matched_creator"):
+        creator = rag_context["matched_creator"]
+        if creator.get("trust", 0) >= 0.90:
+            ctype = creator.get("type", "lecture")
+            if ctype in allowed_types or creator.get("category") in allowed_types or profile.get("id") in ("academic", "developer"):
+                return {
+                    "action": "ALLOW",
+                    "reason": f"RAG Verified Creator: {creator['name']} ({creator['notes'][:28]})",
+                    "category": "podcast_exception" if ctype == "podcast" else "educational_exception",
+                    "domain": host,
+                    "model": "rag-verified-creator",
+                    "rag": rag_context
+                }
+
+    # RAG Fast-Path: Direct Alignment with User's Active Study / Work Goals
+    if not is_risk and rag_context.get("matched_goals"):
+        top_goal = rag_context["matched_goals"][0]
+        if top_goal.get("score", 0) >= 0.70:
+            return {
+                "action": "ALLOW",
+                "reason": f"RAG User Goal: '{top_goal['topic'][:26]}' ({top_goal['score']*100:.0f}%)",
+                "category": "educational_exception",
+                "domain": host,
+                "model": "rag-goal-aligned",
+                "rag": rag_context
+            }
+
+    # RAG Fast-Path: Exact or High-Confidence Memory Recall from User Feedback
+    if not is_risk and rag_context.get("few_shot_exemplars"):
+        top_ex = rag_context["few_shot_exemplars"][0]
+        if top_ex.get("user_override") and top_ex.get("action") == "ALLOW":
+            return {
+                "action": "ALLOW",
+                "reason": f"RAG Memory Recall: Prior user approval for '{top_ex['title'][:26]}'",
+                "category": "memory_learned_exception",
+                "domain": host,
+                "model": "rag-memory-recall",
+                "rag": rag_context
+            }
+
+    # --- TIER 2: Jev Neural Decision Model with RAG Context Augmentation (~47ms) ---
     decider = get_jev_decider()
     if decider is not None and title_clean:
         try:
             from so1 import Choice
 
-            state = f'Title: "{title_clean}"'
+            # Augment Jev's System-One prompt state with retrieved RAG context & memory
+            rag_summary = rag_context.get("rag_summary", "None")
+            state = f'Title: "{title_clean}"\nDomain: {host}\nRetrieved RAG Context: {rag_summary}'
             questions = [
                 Choice("Type", ["podcast", "lecture", "entertainment", "shorts"])
             ]
@@ -193,11 +241,12 @@ def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
                 label = "Podcast / Long-form talk" if choice == "podcast" else "Educational / Deep-dive"
                 return {
                     "action": "ALLOW",
-                    "reason": f"Jev ({profile['badge']}) allowed: {label} ({conf*100:.0f}%)",
+                    "reason": f"Jev+RAG ({profile['badge']}) allowed: {label} ({conf*100:.0f}%)",
                     "category": category,
                     "domain": host,
-                    "model": "jev-system-one",
-                    "confidence": conf
+                    "model": "jev-rag-system-one",
+                    "confidence": conf,
+                    "rag": rag_context
                 }
             else:
                 # Check Daily Entertainment Quota (Max 2 episodes, 1 movie per day)
@@ -214,7 +263,8 @@ def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
                                 "category": "entertainment_quota_allowed",
                                 "domain": host,
                                 "model": "quota-manager",
-                                "quota_info": q_res
+                                "quota_info": q_res,
+                                "rag": rag_context
                             }
                         else:
                             return {
@@ -223,16 +273,18 @@ def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
                                 "category": "entertainment",
                                 "domain": host,
                                 "model": "quota-manager",
-                                "quota_info": q_res
+                                "quota_info": q_res,
+                                "rag": rag_context
                             }
 
                 return {
                     "action": "REDIRECT",
-                    "reason": f"Jev ({profile['badge']}) classified as {choice} ({conf*100:.0f}%)",
+                    "reason": f"Jev+RAG ({profile['badge']}) classified as {choice} ({conf*100:.0f}%)",
                     "category": "entertainment",
                     "domain": host,
-                    "model": "jev-system-one",
-                    "confidence": conf
+                    "model": "jev-rag-system-one",
+                    "confidence": conf,
+                    "rag": rag_context
                 }
         except Exception:
             pass

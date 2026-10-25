@@ -686,14 +686,62 @@
             color: #FFFFFF;
         }
 
-        footer {
-            padding: 24px var(--side-pad);
-            text-align: center;
+        /* RAG Hybrid Knowledge Base & Self-Learning Memory */
+        .rag-goal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            margin-bottom: 8px;
+        }
+
+        .rag-goal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-faint);
+            padding: 8px 12px;
             font-family: var(--font-display);
             font-size: 11px;
+            transition: border-color 0.15s ease;
+        }
+
+        .rag-goal-item:hover {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .rag-goal-topic {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .rag-goal-del {
             color: var(--text-40);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+            cursor: pointer;
+            font-size: 10px;
+            padding: 2px 6px;
+            border: 1px solid transparent;
+        }
+
+        .rag-goal-del:hover {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .rag-retrieval-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-faint);
+            padding: 12px;
+            font-family: var(--font-display);
+            font-size: 11px;
+            line-height: 1.6;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
     </style>
 </head>
@@ -896,6 +944,58 @@
             </div>
             <div class="portals-grid" id="portals-container">
                 <!-- Populated dynamically -->
+            </div>
+        </section>
+
+        <!-- Hybrid RAG Knowledge Base & Memory -->
+        <section class="am-section">
+            <div class="section-header">
+                <span class="eyebrow">[06] HYBRID_RAG_MEMORY // JEV_KNOWLEDGE_ENGINE</span>
+                <span style="font-family: var(--font-display); font-size: 11px; color: #34d399;" id="rag-status-meta">
+                    SUB-1MS HYBRID RETRIEVAL // SELF-LEARNING ACTIVE
+                </span>
+            </div>
+
+            <div class="split-2col">
+                <!-- Left: Active Study & Project Goals Knowledge Base -->
+                <div class="quota-box" style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span class="quota-kind-tag">🎯 USER STUDY & WORK TOPICS</span>
+                        <span class="quota-remaining-badge" id="rag-goals-count">INDEXED GOALS</span>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-60); font-family: var(--font-display); margin-bottom: 12px;">
+                        Jev retrieves these topics to whitelist relevant lectures, research papers, and technical tutorials.
+                    </div>
+                    <div class="rag-goal-list" id="rag-goals-container">
+                        <!-- Populated dynamically via /api/stats -->
+                    </div>
+                    <!-- Add Goal Input Form -->
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                        <input type="text" id="new-goal-input" placeholder="+ Add custom course / research topic..." 
+                               style="flex: 1; background: var(--bg-elevated); border: 1px solid var(--border); color: #fff; padding: 7px 10px; font-family: var(--font-display); font-size: 11px; outline: none;">
+                        <button class="am-tag-btn active" onclick="addNewGoal()">ADD_TOPIC</button>
+                    </div>
+                </div>
+
+                <!-- Right: Live RAG Retrieval & Memory Exemplars -->
+                <div class="quota-box" style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span class="quota-kind-tag">🧠 RECENT RAG RETRIEVAL & FEW-SHOT MEMORY</span>
+                        <span class="quota-remaining-badge" id="rag-exemplars-count" style="color: #60a5fa;">MEMORY READY</span>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-60); font-family: var(--font-display); margin-bottom: 12px;">
+                        Dynamic context injected into Jev's System-One prompt for live tab evaluations.
+                    </div>
+                    <div id="rag-retrieval-display" class="rag-retrieval-box">
+                        <div style="color: var(--text-40); text-align: center;">Awaiting next active browser tab evaluation...</div>
+                    </div>
+                    <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 10px; font-family: var(--font-display); color: var(--text-40);" id="rag-index-summary">
+                            INDEX: 24 CHANNELS • 6 GOALS • CONTINUOUS LEARNING
+                        </span>
+                        <button class="am-tag-btn" onclick="testRagSample()">TEST_SAMPLE</button>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1370,6 +1470,66 @@
                             statusLbl.innerText = `SERIES: ${epUsed}/${epMax} EPS | MOVIES: ${movUsed}/${movMax} FILM`;
                         }
                     }
+
+                    // RAG Memory & Knowledge Engine Update
+                    if (stats.rag) {
+                        const rag = stats.rag;
+                        const goals = rag.user_goals || [];
+                        const goalsCountEl = document.getElementById('rag-goals-count');
+                        if (goalsCountEl) goalsCountEl.innerText = `${goals.length} ACTIVE GOALS`;
+
+                        const goalsContainer = document.getElementById('rag-goals-container');
+                        if (goalsContainer) {
+                            if (goals.length === 0) {
+                                goalsContainer.innerHTML = '<div style="color: var(--text-40); padding: 12px 0; text-align: center;">No custom goals indexed. Add one below.</div>';
+                            } else {
+                                goalsContainer.innerHTML = goals.map(g => `
+                                    <div class="rag-goal-item">
+                                        <div>
+                                            <span style="color: #34d399; font-weight: bold;">•</span>
+                                            <span class="rag-goal-topic" style="margin-left: 6px;">${escapeHtml(g.topic)}</span>
+                                            <span style="font-size: 9px; color: #60a5fa; margin-left: 6px; border: 1px solid rgba(96,165,250,0.3); padding: 1px 4px; text-transform: uppercase;">${escapeHtml(g.category)}</span>
+                                        </div>
+                                        <button class="rag-goal-del" onclick="deleteGoal(${g.id})" title="Delete Goal">✕</button>
+                                    </div>
+                                `).join('');
+                            }
+                        }
+
+                        const exemplarsCountEl = document.getElementById('rag-exemplars-count');
+                        if (exemplarsCountEl) {
+                            exemplarsCountEl.innerText = `${rag.exemplars_count || 0} EXEMPLARS`;
+                        }
+
+                        const indexSummaryEl = document.getElementById('rag-index-summary');
+                        if (indexSummaryEl) {
+                            indexSummaryEl.innerText = `INDEX: ${rag.creators_indexed || 24} CREATORS • ${goals.length} GOALS • ${rag.exemplars_count || 0} MEMORY RECORDS`;
+                        }
+
+                        const retrievals = rag.recent_retrievals || [];
+                        const retDisplay = document.getElementById('rag-retrieval-display');
+                        if (retDisplay && retrievals.length > 0) {
+                            const last = retrievals[0];
+                            const latencyColor = last.latency_ms < 1.0 ? '#34d399' : '#60a5fa';
+                            retDisplay.innerHTML = `
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="color: var(--text-60);">TARGET QUERY:</span>
+                                    <span style="color: ${latencyColor}; font-weight: bold;">⚡ ${last.latency_ms}ms</span>
+                                </div>
+                                <div style="color: #fff; font-weight: bold; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    ${escapeHtml(last.title)}
+                                </div>
+                                <div style="color: var(--text-60); font-size: 10px; margin-bottom: 4px; display: flex; flex-wrap: wrap; gap: 8px;">
+                                    ${last.matched_creator ? `<span style="color: #34d399;">✓ Creator: ${escapeHtml(last.matched_creator)}</span>` : ''}
+                                    ${last.matched_goals && last.matched_goals.length > 0 ? `<span style="color: #60a5fa;">✓ Goal: ${escapeHtml(last.matched_goals.join(', '))}</span>` : ''}
+                                    ${last.few_shot_count ? `<span style="color: #c084fc;">✓ Memory: ${last.few_shot_count} exemplars</span>` : ''}
+                                </div>
+                                <div style="font-size: 10px; color: #a1a1aa; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px; margin-top: 6px; line-height: 1.4;">
+                                    <b style="color: #cbd5e1;">Augmented Context:</b> ${escapeHtml(last.summary || 'Context evaluated')}
+                                </div>
+                            `;
+                        }
+                    }
                 }
 
                 if (histRes.ok) {
@@ -1400,6 +1560,102 @@
                 document.getElementById('sync-indicator').innerText = 'LIVE SYNC';
             } catch (e) {
                 document.getElementById('sync-indicator').innerText = 'LOCAL MODE';
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        async function addNewGoal() {
+            const input = document.getElementById('new-goal-input');
+            if (!input) return;
+            const topic = input.value.trim();
+            if (!topic) return;
+
+            playClick();
+            try {
+                const words = topic.split(/\s+/).filter(w => w.length > 2);
+                await fetch('/api/rag/goal/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        topic: topic,
+                        keywords: words,
+                        category: 'academic'
+                    })
+                });
+                input.value = '';
+                document.getElementById('cli-feedback').innerText = `rag: indexed new study goal [${topic.slice(0, 24)}]`;
+                await fetchTelemetry();
+            } catch (err) {
+                console.error("Failed to add goal", err);
+            }
+        }
+
+        document.getElementById('new-goal-input')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addNewGoal();
+            }
+        });
+
+        async function deleteGoal(goalId) {
+            playClick();
+            try {
+                await fetch(`/api/rag/goal/delete?id=${goalId}`);
+                document.getElementById('cli-feedback').innerText = `rag: deleted goal id #${goalId}`;
+                await fetchTelemetry();
+            } catch (err) {
+                console.error("Failed to delete goal", err);
+            }
+        }
+
+        async function testRagSample() {
+            playClick();
+            const samples = [
+                "Steve Brunton: Physics-Informed Neural Networks for Fluid Mechanics",
+                "3Blue1Brown - Neural Networks: But what is a neural network?",
+                "Demis Hassabis on DeepMind and Protein Folding with Dwarkesh Patel",
+                "Andrej Karpathy: Let's build GPT from scratch"
+            ];
+            const sample = samples[Math.floor(Math.random() * samples.length)];
+            document.getElementById('cli-feedback').innerText = `rag: running sample retrieval [${sample.slice(0, 28)}...]`;
+
+            try {
+                const res = await fetch(`/api/rag/query?title=${encodeURIComponent(sample)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const retDisplay = document.getElementById('rag-retrieval-display');
+                    if (retDisplay) {
+                        const latencyColor = data.retrieval_latency_ms < 1.0 ? '#34d399' : '#60a5fa';
+                        retDisplay.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <span style="color: var(--text-60);">TARGET QUERY:</span>
+                                <span style="color: ${latencyColor}; font-weight: bold;">⚡ ${data.retrieval_latency_ms}ms (LIVE TEST)</span>
+                            </div>
+                            <div style="color: #fff; font-weight: bold; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${escapeHtml(sample)}
+                            </div>
+                            <div style="color: var(--text-60); font-size: 10px; margin-bottom: 4px; display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${data.matched_creator ? `<span style="color: #34d399;">✓ Creator: ${escapeHtml(data.matched_creator.name)} (${data.matched_creator.trust})</span>` : ''}
+                                ${data.matched_goals && data.matched_goals.length > 0 ? `<span style="color: #60a5fa;">✓ Goal: ${escapeHtml(data.matched_goals.map(g => g.topic).join(', '))}</span>` : ''}
+                                ${data.few_shot_exemplars && data.few_shot_exemplars.length > 0 ? `<span style="color: #c084fc;">✓ Memory: ${data.few_shot_exemplars.length} exemplars</span>` : ''}
+                            </div>
+                            <div style="font-size: 10px; color: #a1a1aa; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px; margin-top: 6px; line-height: 1.4;">
+                                <b style="color: #cbd5e1;">Retrieved Context:</b> ${escapeHtml(data.rag_summary || 'Context evaluated')}
+                            </div>
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.error("Test RAG sample error", err);
             }
         }
 

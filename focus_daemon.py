@@ -20,6 +20,7 @@ from decision_engine import evaluate_tab
 from history_reader import analyze_history
 from profiles import get_profile, serialize_profile, list_profiles, PROFILES, DEFAULT_PROFILE_ID
 from quota_manager import get_quota_summary, reset_quota_today, set_quota_limits
+from rag_engine import get_rag
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATS_FILE = os.path.join(BASE_DIR, "focus_stats.json")
@@ -210,11 +211,11 @@ def tab_watcher_loop():
                         last_intercept_time = now
                         redirect_active_tab(browser, REDIRECT_URL)
                         record_intercept(domain, decision.get("reason", "Entertainment"), title)
-                elif decision.get("category") in ("educational_exception", "podcast_exception"):
+                elif decision.get("category") in ("educational_exception", "podcast_exception", "memory_learned_exception"):
                     # Record exception once per session
                     if url != last_intercepted_url:
                         last_intercepted_url = url
-                        label = "Podcast" if decision.get("category") == "podcast_exception" else "Educational"
+                        label = "Podcast" if decision.get("category") == "podcast_exception" else ("Memory Override" if decision.get("category") == "memory_learned_exception" else "Educational")
                         record_allowed_exception(domain, title, decision.get("reason", label))
                 elif decision.get("category") == "entertainment_quota_allowed":
                     # Record entertainment quota exception
@@ -251,6 +252,7 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
                 stats_copy["active_profile"] = act
                 stats_copy["profile_details"] = serialize_profile(get_profile(act))
                 stats_copy["quota"] = get_quota_summary()
+                stats_copy["rag"] = get_rag().get_stats()
                 data = json.dumps(stats_copy).encode("utf-8")
             self.wfile.write(data)
         elif parsed.path == "/api/history":
@@ -339,6 +341,67 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(json.dumps(summary).encode("utf-8"))
+        elif parsed.path == "/api/rag":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            data = json.dumps(get_rag().get_stats()).encode("utf-8")
+            self.wfile.write(data)
+        elif parsed.path == "/api/rag/query":
+            from urllib.parse import parse_qs
+            qs = parse_qs(parsed.query)
+            q_title = qs.get("title", ["Steve Brunton: Physics-Informed Neural Networks"])[0]
+            q_url = qs.get("url", ["https://www.youtube.com/watch?v=sample"])[0]
+            with stats_lock:
+                prof = stats.get("active_profile", DEFAULT_PROFILE_ID)
+            res = get_rag().retrieve(q_url, q_title, profile_id=prof)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode("utf-8"))
+        elif parsed.path == "/api/rag/feedback":
+            from urllib.parse import parse_qs
+            qs = parse_qs(parsed.query)
+            title = qs.get("title", [""])[0]
+            domain = qs.get("domain", [""])[0]
+            action = qs.get("action", ["ALLOW"])[0]
+            reason = qs.get("reason", ["User override"])[0]
+            resp = get_rag().record_feedback(title, domain, action, reason, user_override=True)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
+        elif parsed.path == "/api/rag/goal/add":
+            from urllib.parse import parse_qs
+            qs = parse_qs(parsed.query)
+            topic = qs.get("topic", [""])[0]
+            kws = [k.strip() for k in qs.get("keywords", [""])[0].split(",") if k.strip()]
+            cat = qs.get("category", ["academic"])[0]
+            if topic:
+                resp = get_rag().add_user_goal(topic, kws, cat)
+            else:
+                resp = {"error": "Missing topic"}
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
+        elif parsed.path == "/api/rag/goal/delete":
+            from urllib.parse import parse_qs
+            qs = parse_qs(parsed.query)
+            gid = qs.get("id", [None])[0]
+            if gid:
+                resp = get_rag().delete_user_goal(int(gid))
+            else:
+                resp = {"error": "Missing id"}
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
         else:
             try:
                 with open(DASHBOARD_FILE, "rb") as f:
@@ -401,6 +464,39 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(resp).encode("utf-8"))
         elif parsed.path == "/api/quota/reset":
             resp = reset_quota_today()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
+        elif parsed.path == "/api/rag/feedback":
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                body = json.loads(post_data.decode('utf-8'))
+                title = body.get("title", "")
+                domain = body.get("domain", "")
+                action = body.get("action", "ALLOW")
+                reason = body.get("reason", "User override")
+                resp = get_rag().record_feedback(title, domain, action, reason, user_override=True)
+            except Exception as e:
+                resp = {"error": str(e)}
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
+        elif parsed.path == "/api/rag/goal/add":
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                body = json.loads(post_data.decode('utf-8'))
+                topic = body.get("topic", "")
+                keywords = body.get("keywords", [])
+                category = body.get("category", "academic")
+                resp = get_rag().add_user_goal(topic, keywords, category)
+            except Exception as e:
+                resp = {"error": str(e)}
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
