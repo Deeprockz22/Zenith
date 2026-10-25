@@ -10,6 +10,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 import threading
 from datetime import datetime
 from urllib.parse import urlparse
@@ -50,18 +51,35 @@ def load_quota():
                     default_quota["max_movies"] = data.get("max_movies", DEFAULT_MAX_MOVIES)
                     save_quota(default_quota)
                     return default_quota
-        except Exception as e:
+        except (OSError, json.JSONDecodeError, TypeError, ValueError) as e:
             print(f"[Quota load error]: {e}", file=sys.stderr)
 
     save_quota(default_quota)
     return default_quota
 
 def save_quota(data):
+    directory = os.path.dirname(QUOTA_FILE) or "."
+    temp_path = None
     try:
-        with open(QUOTA_FILE, "w") as f:
+        fd, temp_path = tempfile.mkstemp(
+            prefix=".entertainment_quota.",
+            suffix=".tmp",
+            dir=directory,
+        )
+        with os.fdopen(fd, "w") as f:
             json.dump(data, f, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temp_path, QUOTA_FILE)
+        temp_path = None
     except Exception as e:
         print(f"[Quota save error]: {e}", file=sys.stderr)
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
 import time
 
 _active_playback_tracker = {}

@@ -1315,7 +1315,11 @@
         async function selectProfile(id) {
             playClick();
             try {
-                const res = await fetch(`/api/profile?set=${encodeURIComponent(id)}`);
+                const res = await fetch('/api/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile: id })
+                });
                 if (res.ok) {
                     const data = await res.json();
                     activeProfileId = data.active;
@@ -1615,7 +1619,11 @@
         async function deleteGoal(goalId) {
             playClick();
             try {
-                await fetch(`/api/rag/goal/delete?id=${goalId}`);
+                await fetch('/api/rag/goal/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: goalId })
+                });
                 document.getElementById('cli-feedback').innerText = `rag: deleted goal id #${goalId}`;
                 await fetchTelemetry();
             } catch (err) {
@@ -1668,7 +1676,7 @@
         async function resetStats() {
             if (confirm("Reset current distraction logs?")) {
                 playClick();
-                await fetch('/api/reset');
+                await fetch('/api/reset', { method: 'POST' });
                 fetchTelemetry();
             }
         }
@@ -1676,7 +1684,7 @@
         async function resetQuota() {
             if (confirm("Reset today's entertainment quota (2 episodes, 1 movie)?")) {
                 playClick();
-                await fetch('/api/quota/reset');
+                await fetch('/api/quota/reset', { method: 'POST' });
                 fetchTelemetry();
             }
         }

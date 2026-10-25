@@ -7,6 +7,11 @@ Evaluates page title, URL path, and browsing trajectory with typed decisions in 
 
 import sys
 import threading
+import os
+import json
+import subprocess
+import atexit
+from types import SimpleNamespace
 from urllib.parse import urlparse
 from history_reader import KNOWN_ENTERTAINMENT_ROOTS, KNOWN_PRODUCTIVE_ROOTS, KNOWN_PODCAST_ROOTS
 from profiles import get_profile
@@ -44,28 +49,85 @@ _decider = None
 _model_lock = threading.Lock()
 _is_loading = False
 _model_ready = False
+_worker_process = None
+_worker_lock = threading.Lock()
+
+
+class JevWorkerClient:
+    def __init__(self):
+        self.process = None
+        self.lock = threading.Lock()
+
+    def _start(self):
+        worker = os.path.join(os.path.dirname(__file__), "jev_worker.py")
+        self.process = subprocess.Popen(
+            [sys.executable, worker],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=None,
+            text=True,
+            bufsize=1,
+        )
+
+    def decide(self, state, _questions):
+        with self.lock:
+            if self.process is None or self.process.poll() is not None:
+                self._start()
+            try:
+                self.process.stdin.write(json.dumps({"state": state}) + "\n")
+                self.process.stdin.flush()
+                line = self.process.stdout.readline()
+                if not line:
+                    raise RuntimeError("Jev worker exited without a response")
+                response = json.loads(line)
+                if "error" in response:
+                    raise RuntimeError(response["error"])
+                return [SimpleNamespace(
+                    choice=response["choice"],
+                    confidence=response["confidence"],
+                )]
+            except (BrokenPipeError, OSError, json.JSONDecodeError) as exc:
+                self.close()
+                raise RuntimeError(f"Jev worker unavailable: {exc}") from exc
+
+    def close(self):
+        process, self.process = self.process, None
+        if process is not None and process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                process.kill()
+
+
+def _close_jev_worker():
+    if _worker_process is not None:
+        _worker_process.close()
+
+
+atexit.register(_close_jev_worker)
 
 def get_jev_decider():
-    global _decider, _is_loading, _model_ready
-    if _model_ready and _decider is not None:
-        return _decider
+    global _decider, _is_loading, _model_ready, _worker_process
+    if os.environ.get("FOCUS_ENABLE_JEV_MODEL", "").lower() not in {"1", "true", "yes"}:
+        return None
+    if _worker_process is not None:
+        return _worker_process
 
     with _model_lock:
-        if _decider is not None:
-            return _decider
+        if _worker_process is not None:
+            return _worker_process
         if _is_loading:
             return None
 
         _is_loading = True
         try:
-            print("🧠 Loading Jev decision model (Qwen2.5-0.5B-Instruct)...")
-            from so1 import Decider
-            _decider = Decider.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct", backend="hf", device_map="auto")
+            print("🧠 Starting isolated Jev decision worker...")
+            _worker_process = JevWorkerClient()
             _model_ready = True
-            print("⚡ Jev neural model ready for sub-50ms typed decisions.")
-            return _decider
+            return _worker_process
         except Exception as e:
-            print(f"[Jev load error, falling back to heuristics]: {e}", file=sys.stderr)
+            print(f"[Jev worker error, falling back to heuristics]: {e}", file=sys.stderr)
             return None
         finally:
             _is_loading = False
@@ -252,7 +314,7 @@ def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
                 # Check Daily Entertainment Quota (Max 2 episodes, 1 movie per day)
                 if profile.get("id") != "zen":
                     from quota_manager import detect_media_format, check_entertainment_quota
-                    media_fmt = detect_media_format(url, title_clean, decider=decider)
+                    media_fmt = detect_media_format(url, title_clean)
                     if media_fmt == "streaming_browse":
                         from quota_manager import has_quota_available
                         if has_quota_available():

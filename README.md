@@ -44,6 +44,16 @@ Standard website blockers are dumb: they block everything blindly with harsh 403
 
 ## Key Capabilities
 
+### Evidence-informed intervention design
+
+Reflex treats distraction support as a **just-in-time adaptive intervention**, not a permanent wall:
+
+* Interventions use changing context (active tab, title, trajectory, profile, and quota) rather than blocking every visit.
+* The dashboard keeps control with the user through explicit profiles, goals, quotas, and reset actions.
+* Notifications are brief and limited to meaningful state changes so the intervention does not become another attention sink.
+
+These principles are informed by [Nahum-Shani & Murphy, *Just-in-Time Adaptive Interventions: Where Are We Now and What Is Next?* (2025)](https://pmc.ncbi.nlm.nih.gov/articles/PMC13217361/) and [Lukoff, Lyngs & colleagues, *Designing to Support Autonomy and Reduce Psychological Reactance in Digital Self-Control Tools* (2022)](https://ulriklyngs.com/pdfs/lukoff-lyngs-alberts-2022-dscts_for_autonomy.pdf). They are product-design references, not claims that Reflex is a clinical intervention.
+
 ### ⚡ 1. Local Jev System One Decision Engine
 * Powered by `open-alternative-jev` (`so1`) running on top of **`Qwen2.5-0.5B-Instruct`**.
 * **47.5 ms average warm latency** on Apple Silicon via Metal Performance Shaders (MPS).
@@ -86,6 +96,56 @@ Standard website blockers are dumb: they block everything blindly with harsh 403
 ---
 
 ## Quickstart
+
+### Memory-efficient mode
+
+Zenith defaults to the lightweight heuristic/RAG path and does **not** load the
+500M-parameter Jev model. This keeps the background daemon small and avoids
+allocating model weights unless you explicitly need neural classification.
+
+To opt into the larger model for a session:
+
+```bash
+FOCUS_ENABLE_JEV_MODEL=1 ./focus.sh run-fg
+```
+
+For everyday use, prefer the default mode; use the neural model for evaluation
+or experiments where its additional classification quality is worth the memory
+cost.
+
+### Isolated JEV and Rust control plane
+
+When JEV is enabled, Zenith keeps the model in `jev_worker.py`, a separate
+process. The browser watcher remains lightweight, and the worker can be
+terminated independently if model inference is no longer needed.
+
+The optional `rust-daemon/` crate is a dependency-free, release-optimized
+control-plane foundation for moving always-on HTTP/health responsibilities out
+of Python. It intentionally does not claim to replace macOS browser automation
+yet; that surface still depends on AppleScript permissions and remains in the
+Python watcher.
+
+```bash
+cd rust-daemon
+cargo run --release
+curl http://127.0.0.1:5051/health
+```
+
+The model is configurable with `FOCUS_JEV_MODEL_ID`; use a smaller compatible
+checkpoint or a quantized checkpoint supported by the installed `so1` backend
+without changing the watcher:
+
+```bash
+FOCUS_ENABLE_JEV_MODEL=1 \
+FOCUS_JEV_MODEL_ID=Qwen/Qwen2.5-0.5B-Instruct \
+./focus.sh run-fg
+```
+
+If the installed Transformers environment supports bitsandbytes, `FOCUS_JEV_4BIT=1`
+or `FOCUS_JEV_8BIT=1` enables weight quantization. On Apple Silicon, float16
+may reduce memory on some setups, but should be benchmarked because backend/device
+combinations can fail. Unsupported optimized settings automatically fall back to
+the backend default where the worker process remains alive.
 
 ### 1. Clone & Set Up Environment
 

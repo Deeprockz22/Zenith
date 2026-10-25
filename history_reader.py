@@ -8,7 +8,7 @@ aggregates real habits, and detects doomscroll patterns.
 import os
 import shutil
 import sqlite3
-import time
+import tempfile
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
@@ -69,8 +69,10 @@ def analyze_history(limit=500, profile_id=None):
             "recent_trajectory": []
         }
 
-    tmp_db = f"/tmp/focus_hist_{int(time.time())}.sqlite"
+    tmp_db = None
     try:
+        fd, tmp_db = tempfile.mkstemp(prefix="focus_hist_", suffix=".sqlite")
+        os.close(fd)
         shutil.copy2(db_path, tmp_db)
         conn = sqlite3.connect(tmp_db)
         cursor = conn.cursor()
@@ -126,6 +128,7 @@ def analyze_history(limit=500, profile_id=None):
                     "title": title or host,
                     "host": host,
                     "is_distraction": is_distraction,
+                    "timestamp": visit_dt.isoformat(),
                     "time": visit_dt.strftime("%H:%M")
                 })
 
@@ -149,7 +152,7 @@ def analyze_history(limit=500, profile_id=None):
     except Exception as e:
         return {"error": str(e), "browser": browser_name or "Unknown"}
     finally:
-        if os.path.exists(tmp_db):
+        if tmp_db and os.path.exists(tmp_db):
             try:
                 os.remove(tmp_db)
             except Exception:
@@ -158,12 +161,18 @@ def analyze_history(limit=500, profile_id=None):
 def check_recent_doomscroll_loop(threshold_count=3, window_minutes=15):
     """Returns True if the user has visited threshold_count distraction domains within window_minutes."""
     analysis = analyze_history(limit=50)
-    now = datetime.now()
-    cutoff = now - timedelta(minutes=window_minutes)
+    cutoff = datetime.now() - timedelta(minutes=window_minutes)
 
     distraction_events = []
     for item in analysis.get("recent_trajectory", []):
-        if item.get("is_distraction"):
+        if not item.get("is_distraction"):
+            continue
+        try:
+            visit_dt = datetime.fromisoformat(item["timestamp"])
+        except (KeyError, TypeError, ValueError):
+            # Ignore entries from older cached data that has no timestamp.
+            continue
+        if visit_dt >= cutoff:
             distraction_events.append(item)
 
     return len(distraction_events) >= threshold_count, len(distraction_events)

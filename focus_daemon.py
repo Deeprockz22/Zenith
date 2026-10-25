@@ -256,6 +256,21 @@ def tab_watcher_loop():
 class FocusHTTPHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
+        mutation_paths = {
+            "/api/reset",
+            "/api/quota/reset",
+            "/api/quota/set",
+            "/api/rag/feedback",
+            "/api/rag/goal/add",
+            "/api/rag/goal/delete",
+        }
+        if parsed.path in mutation_paths or (
+            parsed.path == "/api/profile" and "set=" in parsed.query
+        ):
+            self.send_response(405)
+            self.send_header("Allow", "POST")
+            self.end_headers()
+            return
         if parsed.path == "/api/stats":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")

@@ -101,7 +101,13 @@ except Exception:
         python3 -c "
 import urllib.request, json
 try:
-    with urllib.request.urlopen('http://localhost:5050/api/profile?set=$2') as res:
+    req = urllib.request.Request(
+        'http://localhost:5050/api/profile',
+        data=json.dumps({'profile': '$2'}).encode(),
+        headers={'Content-Type': 'application/json'},
+        method='POST',
+    )
+    with urllib.request.urlopen(req) as res:
         d = json.loads(res.read().decode())
         if 'error' in d:
             print('❌ Error:', d['error'])
@@ -121,7 +127,13 @@ quota() {
         python3 -c "
 import urllib.request, json
 try:
-    with urllib.request.urlopen('http://localhost:5050/api/quota/reset') as res:
+    req = urllib.request.Request(
+        'http://localhost:5050/api/quota/reset',
+        data=b'{}',
+        headers={'Content-Type': 'application/json'},
+        method='POST',
+    )
+    with urllib.request.urlopen(req) as res:
         d = json.loads(res.read().decode())
         print('✅ Daily entertainment quota reset!')
         print(f'   Series: 0/{d.get(\"episodes_max\", 2)} | Movies: 0/{d.get(\"movies_max\", 1)}')
@@ -139,7 +151,13 @@ except Exception as e:
         python3 -c "
 import urllib.request, json
 try:
-    with urllib.request.urlopen(f'http://localhost:5050/api/quota/set?episodes=$eps&movies=$movs') as res:
+    req = urllib.request.Request(
+        'http://localhost:5050/api/quota/set',
+        data=json.dumps({'episodes': int('$eps'), 'movies': int('$movs')}).encode(),
+        headers={'Content-Type': 'application/json'},
+        method='POST',
+    )
+    with urllib.request.urlopen(req) as res:
         d = json.loads(res.read().decode())
         print(f'✅ Entertainment quota limits updated: Max {d.get(\"episodes_max\")} episodes, {d.get(\"movies_max\")} movies per day.')
 except Exception as e:
@@ -197,12 +215,23 @@ run_fg() {
     exec "$PYTHON_BIN" "$DAEMON_SCRIPT"
 }
 
+run_rust_control() {
+    if ! command -v cargo >/dev/null 2>&1; then
+        echo "❌ Rust/Cargo is not installed. Install Rust, then run: $0 rust-control"
+        return 1
+    fi
+    (cd "$DIR/rust-daemon" && cargo run --release)
+}
+
 case "$1" in
     start)
         start
         ;;
     run-fg)
         run_fg
+        ;;
+    rust-control)
+        run_rust_control
         ;;
     stop)
         stop
@@ -225,7 +254,7 @@ case "$1" in
         start
         ;;
     *)
-        echo "Usage: $0 {start|stop|status|restart|open|profile [id]|quota [reset|set]}"
+        echo "Usage: $0 {start|stop|status|restart|open|run-fg|rust-control|profile [id]|quota [reset|set]}"
         exit 1
         ;;
 esac
