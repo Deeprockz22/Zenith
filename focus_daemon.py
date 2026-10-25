@@ -13,7 +13,7 @@ import sys
 import threading
 import time
 from datetime import datetime
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse
 
 from decision_engine import evaluate_tab
@@ -66,6 +66,13 @@ def save_stats(data):
 
 stats = load_stats()
 
+
+def applescript_string(value, limit=120):
+    """Return a safely quoted AppleScript string literal."""
+    text = str(value or "")[:limit]
+    return '"' + text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ") + '"'
+
+
 # Cached history analysis (refreshed periodically)
 cached_history_data = {}
 history_lock = threading.Lock()
@@ -83,9 +90,11 @@ def refresh_history_cache():
 
 def notify_user(domain, reason=""):
     subtitle = reason if reason else "Entertainment Intercepted"
-    apple_script = f'''
-    display notification "Redirected from {domain} to your Focus Zone." with title "Focus Mode Active 🎯" subtitle "{subtitle[:35]}"
-    '''
+    apple_script = (
+        f"display notification {applescript_string(f'Redirected from {domain} to your Focus Zone.', 180)} "
+        f"with title {applescript_string('Focus Mode Active 🎯')} "
+        f"subtitle {applescript_string(subtitle, 35)}"
+    )
     subprocess.run(["osascript", "-e", apple_script], capture_output=True)
 
 def record_intercept(domain, reason, title):
@@ -223,19 +232,25 @@ def tab_watcher_loop():
                         last_intercepted_url = url
                         reason = decision.get("reason", "Daily Quota Allowed")
                         q_info = decision.get("quota_info", {})
-                        if not q_info.get("is_existing"):
+                        if q_info.get("just_confirmed"):
                             m_type = "TV Episode" if q_info.get("media_type") == "episode" else "Feature Movie"
                             used = q_info.get("used", 1)
                             max_val = q_info.get("max", 2)
-                            sub = f"Daily Quota: {m_type} {used}/{max_val} allowed"
-                            apple_script = f'''
-                            display notification "{title[:40]}" with title "Mindful Entertainment 🎬" subtitle "{sub}"
-                            '''
+                            sub = f"Daily Quota: {m_type} {used}/{max_val} started"
+                            apple_script = (
+                                f"display notification {applescript_string(title, 40)} "
+                                f"with title {applescript_string('Mindful Entertainment 🎬')} "
+                                f"subtitle {applescript_string(sub, 80)}"
+                            )
                             subprocess.run(["osascript", "-e", apple_script], capture_output=True)
                         record_allowed_exception(domain, title, reason)
+                elif decision.get("category") == "entertainment_browse":
+                    if url != last_intercepted_url:
+                        last_intercepted_url = url
 
             time.sleep(0.8)
-        except Exception:
+        except Exception as exc:
+            print(f"[Watcher error] {exc}", file=sys.stderr)
             time.sleep(1.0)
 
 class FocusHTTPHandler(SimpleHTTPRequestHandler):
@@ -290,7 +305,10 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
                 p = get_profile(new_prof)
                 p_name = p.get('name', 'Persona')
                 p_badge = p.get('badge', '')
-                script = f'display notification "Switched focus persona to {p_name}" with title "Focus Persona Active {p_badge}"'
+                script = (
+                    f"display notification {applescript_string(f'Switched focus persona to {p_name}', 120)} "
+                    f"with title {applescript_string(f'Focus Persona Active {p_badge}', 80)}"
+                )
                 subprocess.run(["osascript", "-e", script], capture_output=True)
                 resp = {"status": "ok", "active": new_prof, "profile": serialize_profile(p)}
             else:
@@ -418,11 +436,46 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         parsed = urlparse(self.path)
-        if parsed.path == "/api/profile":
-            content_length = int(self.headers.get('Content-Length', 0))
-            post_data = self.rfile.read(content_length)
+        content_length = int(self.headers.get("Content-Length", 0))
+        post_data = self.rfile.read(content_length)
+        try:
+            body = json.loads(post_data.decode("utf-8")) if post_data else {}
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(f"Invalid JSON: {exc}".encode("utf-8"))
+            return
+
+        if parsed.path == "/api/reset":
+            with stats_lock:
+                stats["total_intercepted"] = 0
+                stats["site_counts"] = {}
+                stats["history"] = []
+                stats["exceptions_allowed"] = []
+                save_stats(stats)
+            self.send_response(204)
+            self.end_headers()
+            return
+        if parsed.path == "/api/quota/reset":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(reset_quota_today()).encode("utf-8"))
+            return
+        if parsed.path == "/api/rag/goal/delete":
             try:
-                body = json.loads(post_data.decode('utf-8'))
+                goal_id = int(body.get("id"))
+                resp = get_rag().delete_user_goal(goal_id)
+            except (TypeError, ValueError) as exc:
+                resp = {"error": f"Invalid goal id: {exc}"}
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode("utf-8"))
+            return
+
+        if parsed.path == "/api/profile":
+            try:
                 new_prof = body.get("profile")
                 if new_prof == "student":
                     new_prof = "academic"
@@ -434,7 +487,10 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
                     p = get_profile(new_prof)
                     p_name = p.get('name', 'Persona')
                     p_badge = p.get('badge', '')
-                    script = f'display notification "Switched focus persona to {p_name}" with title "Focus Persona Active {p_badge}"'
+                    script = (
+                        f"display notification {applescript_string(f'Switched focus persona to {p_name}', 120)} "
+                        f"with title {applescript_string(f'Focus Persona Active {p_badge}', 80)}"
+                    )
                     subprocess.run(["osascript", "-e", script], capture_output=True)
                     resp = {"status": "ok", "active": new_prof, "profile": serialize_profile(p)}
                 else:
@@ -448,10 +504,7 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(resp).encode("utf-8"))
         elif parsed.path == "/api/quota/set":
-            content_length = int(self.headers.get('Content-Length', 0))
-            post_data = self.rfile.read(content_length)
             try:
-                body = json.loads(post_data.decode('utf-8'))
                 max_ep = body.get("episodes", 2)
                 max_mov = body.get("movies", 1)
                 resp = set_quota_limits(int(max_ep), int(max_mov))
@@ -470,10 +523,7 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(resp).encode("utf-8"))
         elif parsed.path == "/api/rag/feedback":
-            content_length = int(self.headers.get('Content-Length', 0))
-            post_data = self.rfile.read(content_length)
             try:
-                body = json.loads(post_data.decode('utf-8'))
                 title = body.get("title", "")
                 domain = body.get("domain", "")
                 action = body.get("action", "ALLOW")
@@ -487,10 +537,7 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(resp).encode("utf-8"))
         elif parsed.path == "/api/rag/goal/add":
-            content_length = int(self.headers.get('Content-Length', 0))
-            post_data = self.rfile.read(content_length)
             try:
-                body = json.loads(post_data.decode('utf-8'))
                 topic = body.get("topic", "")
                 keywords = body.get("keywords", [])
                 category = body.get("category", "academic")
@@ -512,7 +559,7 @@ class FocusHTTPHandler(SimpleHTTPRequestHandler):
 def run_server():
     # Initial history population
     refresh_history_cache()
-    server = HTTPServer(("127.0.0.1", PORT), FocusHTTPHandler)
+    server = ThreadingHTTPServer(("127.0.0.1", PORT), FocusHTTPHandler)
     print(f"🚀 Focus Dashboard live at: http://localhost:{PORT}")
     server.serve_forever()
 

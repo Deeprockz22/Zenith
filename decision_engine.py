@@ -253,13 +253,37 @@ def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
                 if profile.get("id") != "zen":
                     from quota_manager import detect_media_format, check_entertainment_quota
                     media_fmt = detect_media_format(url, title_clean, decider=decider)
-                    if media_fmt in ("episode", "movie"):
+                    if media_fmt == "streaming_browse":
+                        from quota_manager import has_quota_available
+                        if has_quota_available():
+                            return {
+                                "action": "ALLOW",
+                                "reason": "Streaming Catalog: Browsing (No quota consumed)",
+                                "category": "entertainment_browse",
+                                "domain": host,
+                                "model": "quota-manager",
+                                "rag": rag_context
+                            }
+                        else:
+                            return {
+                                "action": "REDIRECT",
+                                "reason": "Daily entertainment quota reached: no episodes or movies remaining today",
+                                "category": "entertainment",
+                                "domain": host,
+                                "model": "quota-manager",
+                                "rag": rag_context
+                            }
+                    elif media_fmt in ("episode", "movie"):
                         q_res = check_entertainment_quota(url, title_clean, media_fmt)
                         if q_res.get("allowed"):
                             label = "Series Episode" if media_fmt == "episode" else "Feature Movie"
+                            if not q_res.get("confirmed"):
+                                reason_msg = f"Trial Playback: {label} (Running {int(q_res.get('duration_seconds', 0))}s / 60s to count)"
+                            else:
+                                reason_msg = f"Quota Allowed: {label} ({q_res['used']}/{q_res['max']} today)"
                             return {
                                 "action": "ALLOW",
-                                "reason": f"Quota Allowed: {label} ({q_res['used']}/{q_res['max']} today)",
+                                "reason": reason_msg,
                                 "category": "entertainment_quota_allowed",
                                 "domain": host,
                                 "model": "quota-manager",
@@ -310,15 +334,36 @@ def evaluate_tab(url, title, recent_trajectory=None, profile_id=None):
 
     # Check Daily Entertainment Quota for series & movies in heuristic fallback
     if profile.get("id") != "zen":
-        from quota_manager import detect_media_format, check_entertainment_quota
+        from quota_manager import detect_media_format, check_entertainment_quota, has_quota_available
         media_fmt = detect_media_format(url, title_clean)
-        if media_fmt in ("episode", "movie"):
+        if media_fmt == "streaming_browse":
+            if has_quota_available():
+                return {
+                    "action": "ALLOW",
+                    "reason": "Streaming Catalog: Browsing (No quota consumed)",
+                    "category": "entertainment_browse",
+                    "domain": host,
+                    "model": "quota-manager"
+                }
+            else:
+                return {
+                    "action": "REDIRECT",
+                    "reason": "Daily entertainment quota reached: no episodes or movies remaining today",
+                    "category": "entertainment",
+                    "domain": host,
+                    "model": "quota-manager"
+                }
+        elif media_fmt in ("episode", "movie"):
             q_res = check_entertainment_quota(url, title_clean, media_fmt)
             if q_res.get("allowed"):
                 label = "Series Episode" if media_fmt == "episode" else "Feature Movie"
+                if not q_res.get("confirmed"):
+                    reason_msg = f"Trial Playback: {label} (Running {int(q_res.get('duration_seconds', 0))}s / 60s to count)"
+                else:
+                    reason_msg = f"Quota Allowed: {label} ({q_res['used']}/{q_res['max']} today)"
                 return {
                     "action": "ALLOW",
-                    "reason": f"Quota Allowed: {label} ({q_res['used']}/{q_res['max']} today)",
+                    "reason": reason_msg,
                     "category": "entertainment_quota_allowed",
                     "domain": host,
                     "model": "quota-manager",
